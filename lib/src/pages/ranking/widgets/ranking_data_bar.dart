@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:tecnonautas_app/src/resources/app_colors.dart';
+import 'package:tecnonautas_app/src/resources/image_sizes.dart';
 
 class RankingDataItem { 
 
   final Widget mTitle;
   final Widget mContent;
   final Widget mTrailing;
+  final Color mBackgroundColor;
 
   RankingDataItem({
     @required this.mTitle, 
     @required this.mContent, 
-    @required this.mTrailing
+    @required this.mTrailing,
+    this.mBackgroundColor = accent
   });
 
 }
@@ -20,36 +24,34 @@ class RankingDataBar extends StatelessWidget {
   final double mWidth;  
   final EdgeInsetsGeometry mPadding;
   final EdgeInsetsGeometry mMargin;
-  final Color mBackgroundColor;
   final RankingDataItem mItem;
+  final double mBorderRadius; 
   
   RankingDataBar({
     this.mHeight,
     this.mWidth,
     this.mPadding,
     this.mMargin,
-    this.mBackgroundColor,
-    this.mItem
+    this.mItem,
+    this.mBorderRadius
   });
 
   @override
   Widget build(BuildContext context) {
     
-    final double borderRadius = 15;
-    final double padding = 10;
-
     return Container(
       width: mWidth,
       height: mHeight,
       padding: mPadding,
       margin: mMargin,
       decoration: BoxDecoration(
-        color: mBackgroundColor,
-        borderRadius: BorderRadius.circular(borderRadius)
+        color: mItem.mBackgroundColor,
+        borderRadius: BorderRadius.circular(mBorderRadius)
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
-          SizedBox(width: 100),
+          SizedBox(width: mediumImage - 10),
           Expanded(child: mItem.mTitle),
           Expanded(child: mItem.mContent),
           Expanded(child: 
@@ -57,7 +59,7 @@ class RankingDataBar extends StatelessWidget {
               child: Align(alignment: 
                 Alignment.centerRight,
                 child: Container(
-                  margin: EdgeInsets.only(right: 15),
+                  margin: EdgeInsets.only(right: 5),
                   child: mItem.mTrailing,
                 ),
               )

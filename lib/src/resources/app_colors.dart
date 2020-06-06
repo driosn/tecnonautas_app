@@ -10,5 +10,13 @@ const Color favoriteColor     = Color(0xffDB96E8);
 
 // Trivia status colors
 const Color correctColor      = Color(0xff8BC64A);
-const Color wrongColor      = Color(0xffDF463C);
+const Color wrongColor        = Color(0xffDF463C);
 const Color neutralColor      = Color(0xff6A89B8);
+
+// Profile ranking detail colors
+const Color lightBlue             = Color(0xff64E7F9);
+const Color lightPink             = Color(0xffFBE2FF);
+const Color lightYellow           = Color(0xffFFF9DE);
+const Color accentBlue            = Color(0xff3097D5);
+const Color accentPurple          = Color(0xff9E5FA9);
+const Color accentYellow          = Color(0xffFFAC2F);

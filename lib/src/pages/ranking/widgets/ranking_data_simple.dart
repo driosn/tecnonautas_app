@@ -26,9 +26,9 @@ RankingDataSimple({@required this.mItem, this.mWidth}) {
               child: Center(
                 child: RankingDataBar(
                   mHeight: mediumImage * 0.6,
-                  mBackgroundColor: Colors.purple,
                   mMargin: EdgeInsets.only(left: 15),
-                  mItem: mItem
+                  mItem: mItem,
+                  mBorderRadius: 15,
                 )
               ),
             ),

@@ -28,7 +28,7 @@ class TecnonautasCircularAvatar extends StatelessWidget {
       width: mAvatarRadius * 2,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: primary, width: 3),
+        border: Border.all(color: lightBlue, width: 3),
         image: DecorationImage(
           image: mAvatarImage
         )
