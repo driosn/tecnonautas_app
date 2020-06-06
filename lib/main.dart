@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
             ),
           )
         ),
-        initialRoute: 'ranking',
+        initialRoute: '/',
         onGenerateRoute: Router.generateRoute,
       ),
     );

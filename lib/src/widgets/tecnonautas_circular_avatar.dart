@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tecnonautas_app/src/resources/app_colors.dart';
+import 'package:tecnonautas_app/src/resources/image_sizes.dart';
 
 class TecnonautasCircularAvatar extends StatelessWidget {
   
@@ -9,15 +10,15 @@ class TecnonautasCircularAvatar extends StatelessWidget {
   TecnonautasCircularAvatar({@required this.mAvatarRadius, @required this.mAvatarImage});
 
   TecnonautasCircularAvatar.small({@required this.mAvatarImage}) {
-    this.mAvatarRadius = 25;
+    this.mAvatarRadius = smallImage / 2;
   }
 
   TecnonautasCircularAvatar.medium({@required this.mAvatarImage}) {
-    this.mAvatarRadius = 50;
+    this.mAvatarRadius = mediumImage / 2;
   }
 
   TecnonautasCircularAvatar.large({@required this.mAvatarImage}) {
-    this.mAvatarRadius = 60;
+    this.mAvatarRadius = largeImage / 2;
   }
 
   @override
