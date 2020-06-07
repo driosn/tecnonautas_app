@@ -91,16 +91,18 @@ class __BottomNavBarState extends State<_BottomNavBar> {
 
   Widget _underlinedText(String title) {  
     final size = MediaQuery.of(context).size;
+    final portalHomeModel = Provider.of<PortalHomeModel>(context);
+    final textColor = portalHomeModel.isTriviasPage ? accent : Colors.white;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        Text(title),
+        Text(title, style: TextStyle(color: textColor)),
         SizedBox(height: 5),
         Container(
           width: size.width / 5,
           height: 5,
-          color: Colors.white,
+          color: textColor,
         )
       ],
     );
