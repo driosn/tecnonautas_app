@@ -1,24 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:tecnonautas_app/src/resources/app_colors.dart';
+import 'package:tecnonautas_app/src/widgets/gradient_button.dart';
 import 'package:tecnonautas_app/src/widgets/info_card.dart';
+import 'package:tecnonautas_app/src/widgets/tecnonautas_button.dart';
 
 class TriviaInfoDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
     final double insetPadding = 12;
+    final double borderRadius = 15;
 
     return Dialog(
+      backgroundColor: Colors.transparent,
       insetPadding: EdgeInsets.symmetric(horizontal: insetPadding),
-      child: Container(
-        width: double.infinity,
-        color: Theme.of(context).scaffoldBackgroundColor,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            _InfoHeader(triviaName: 'Formulas Químicas', isFavorite: false),
-            _InfoContent()
-          ],
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              _InfoHeader(triviaName: 'Formulas Químicas', isFavorite: false),
+              _InfoContent()
+            ],
+          ),
         ),
       ),
     );
@@ -52,7 +61,7 @@ class _InfoHeader extends StatelessWidget {
               Text('Trivia', style: TextStyle(color: darkGrey),),
               GestureDetector(
                 child: Icon(Icons.close, color: Colors.black54),
-                onTap: () {},
+                onTap: () => Navigator.pop(context),
               )
             ],
           ),
@@ -102,7 +111,9 @@ class _InfoContent extends StatelessWidget {
       child: Column(
         children: <Widget>[
           _triviaDescription(_mTriviaDescription),
-          _triviaCardsInfo(context)
+          SizedBox(height: _contentPadding),
+          _triviaCardsInfo(context),
+          _actionButtons(context)
         ],
       ),
     );
@@ -172,6 +183,52 @@ class _InfoContent extends StatelessWidget {
           style: TextStyle(color: Colors.black54, fontWeight: FontWeight.w400),
         ) 
       ],
+    );
+  }
+
+  Widget _actionButtons(BuildContext context) {
+    
+    final double btnHeight = 50;
+    final double btnWidth = 200;
+    final double btnRadius = 8;
+    final EdgeInsetsGeometry sectionPadding = EdgeInsets.symmetric(vertical: 16); 
+    final EdgeInsetsGeometry sectionMargin = EdgeInsets.only(top: 16);
+
+    return Container(
+      margin: sectionMargin,
+      padding: sectionPadding,
+      child: Column(
+        children: <Widget>[
+          GradientButton(
+            mHeight: btnHeight,
+            mWidth: btnWidth,
+            mRadius: btnRadius,
+            mText: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Icon(Icons.stars, color: Colors.white,), 
+                SizedBox(width: 5),
+                Text("JUGAR", style: Theme.of(context).textTheme.subtitle2.copyWith(color: Colors.white))
+              ],
+            ), 
+            mColors: <Color> [
+              accent,
+              primary
+            ], 
+            mOnPressed: () { Navigator.pushNamed(context, 'play'); }
+          ),
+          SizedBox(height: 24),
+          TecnonautasButton(
+            mHeight: btnHeight,
+            mWidth: btnWidth,
+            mRadius: btnRadius,
+            mText: Text('Cerrar', style: TextStyle(color: Colors.black54, fontWeight: FontWeight.bold),), 
+            mColor: Colors.white, 
+            mOnPressed: () {}
+          )
+        ],
+      ),
     );
   }
 }

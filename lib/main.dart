@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
         title: 'Material App',
         theme: ThemeData(
           brightness: Brightness.light,
-          primaryColor: Color(0xff41C0D3),
+          primaryColor: Color(0xff40C1D4),
           accentColor: Color(0xff723A7C),
           primaryColorLight: Color(0xff99E0E8),
           scaffoldBackgroundColor: Color(0xffF4F7FD),

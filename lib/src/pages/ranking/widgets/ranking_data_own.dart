@@ -38,7 +38,7 @@ RankingDataOwn({@required this.mItems, this.mWidth}) {
               ),
             ),
             TecnonautasCircularAvatar.medium(
-              mAvatarImage: AssetImage('assets/images/cat_image.jpg')
+              mAvatarImage: AssetImage('assets/images/avatar.jpg')
             ),
           ],
         ),
