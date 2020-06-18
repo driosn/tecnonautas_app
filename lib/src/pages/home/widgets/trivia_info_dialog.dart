@@ -147,7 +147,7 @@ class _InfoContent extends StatelessWidget {
           child: InfoCard(
             mHeight: cardHeight, 
             mTitle: 'Responde', 
-            mIcon: Icons.ac_unit, 
+            mIcon: Icon(Icons.ac_unit, color: accent), 
             mChild: _cardContent(context, '4', 'Preguntas \n(lo antes posible)')
           ),
         ),
@@ -156,7 +156,7 @@ class _InfoContent extends StatelessWidget {
           child: InfoCard(
             mHeight: cardHeight, 
             mTitle: 'Gana', 
-            mIcon: Icons.ac_unit, 
+            mIcon: Icon(Icons.ac_unit, color: accent), 
             mChild: _cardContent(context, '10', 'Puntos')
           ),
         )

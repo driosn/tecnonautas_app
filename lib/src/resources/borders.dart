@@ -1,0 +1,1 @@
+const double normalBorderRadius = 10;

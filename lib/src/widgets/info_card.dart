@@ -6,7 +6,7 @@ class InfoCard extends StatelessWidget {
   final double mHeight;
   final double mWidth;
   final String mTitle;
-  final IconData mIcon;
+  final Widget mIcon;
   final Widget mChild;
 
   InfoCard({
@@ -37,7 +37,7 @@ class InfoCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Text(mTitle, style: Theme.of(context).textTheme.subtitle),
-                Icon(mIcon, color: accent)
+                mIcon
               ],
             ),
           ),

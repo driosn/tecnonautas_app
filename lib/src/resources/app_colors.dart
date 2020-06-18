@@ -32,3 +32,10 @@ const Color redPiece      = Color(0xffDF645F);
 const Color bluePiece     = Color(0xff55B7E5);
 const Color greenPiece    = Color(0xff97C864);
 const Color orangePiece   = Color(0xffECA563);
+
+// Shadow Colors
+const Color lightGreyColor = Color(0xff848484);
+const Color darkGreyColor = Color(0xff848484);
+
+// Special Colors
+const Color goldColor = Color(0xffFFA122);
