@@ -5,9 +5,8 @@ import 'package:tecnonautas_app/src/pages/ranking/widgets/ranking_data_own.dart'
 import 'package:tecnonautas_app/src/pages/ranking/widgets/ranking_data_simple.dart';
 import 'package:tecnonautas_app/src/providers/portal_home_model.dart';
 import 'package:tecnonautas_app/src/resources/app_colors.dart';
+import 'package:tecnonautas_app/src/widgets/appbar/tecnonautas_appbar.dart';
 import 'package:tecnonautas_app/src/widgets/gradient_container.dart';
-import 'package:tecnonautas_app/src/widgets/tecnonautas_circular_avatar.dart';
-import 'package:tecnonautas_app/src/widgets/tecnonautas_header.dart';
 import 'package:tecnonautas_app/src/widgets/trivias_status_card.dart';
 
 class RankingPage extends StatefulWidget {
@@ -48,8 +47,6 @@ class _AvatarInfo extends StatelessWidget {
 
     return SafeArea(
       child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 8),
-        padding: EdgeInsets.symmetric(horizontal: 8),
         child: Column(
           children: <Widget>[
             Container(
@@ -60,7 +57,7 @@ class _AvatarInfo extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  TecnonautasHeader(),
+                  TecnonautasAppbar(),
                   _AvatarSummary(),
                   Text(
                     'TRIVIAS', 

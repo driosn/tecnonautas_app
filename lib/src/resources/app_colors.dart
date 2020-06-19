@@ -39,3 +39,6 @@ const Color darkGreyColor = Color(0xff848484);
 
 // Special Colors
 const Color goldColor = Color(0xffFFA122);
+
+// Appbar Colors
+const Color levelBarColor = Color(0xff21A2DC);

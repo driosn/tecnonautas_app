@@ -11,8 +11,8 @@ class Router {
     
     switch(settings.name) {
       case '/':
-        // return MaterialPageRoute(builder: (_) => PortalHomePage());
-        return MaterialPageRoute(builder: (_) => TriviaStatusPage());
+        return MaterialPageRoute(builder: (_) => PortalHomePage());
+        // return MaterialPageRoute(builder: (_) => TriviaStatusPage());
       case 'ranking':
         return MaterialPageRoute(builder: (_) => RankingPage());
       case 'play':

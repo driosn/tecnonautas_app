@@ -3,10 +3,10 @@ import 'package:provider/provider.dart';
 import 'package:tecnonautas_app/src/pages/home/widgets/active_trivia_card.dart';
 import 'package:tecnonautas_app/src/pages/home/widgets/trivia_card_item.dart';
 import 'package:tecnonautas_app/src/providers/portal_home_model.dart';
+import 'package:tecnonautas_app/src/widgets/appbar/tecnonautas_appbar.dart';
 import 'package:tecnonautas_app/src/widgets/circle_icon_button.dart';
 import 'package:tecnonautas_app/src/widgets/custom_search_input.dart';
 import 'package:tecnonautas_app/src/widgets/rounded_button.dart';
-import 'package:tecnonautas_app/src/widgets/tecnonautas_header.dart';
 import 'package:tecnonautas_app/src/widgets/transparent_container.dart';
 
 class TriviasPage extends StatefulWidget {
@@ -60,12 +60,15 @@ class _TriviasPageState extends State<TriviasPage> {
   Widget build(BuildContext context) {
 
     return Scaffold(
+      appBar: AppBar(
+        title: TecnonautasAppbar()
+      ),
       body: _BackgroundContainer(
         child: SafeArea(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              TecnonautasHeader(),
+              // TecnonautasHeader(),
               Expanded(
                 child: ListView(
                   physics: BouncingScrollPhysics(),
