@@ -11,28 +11,21 @@ class TecnonautasAppbar extends StatelessWidget {
   });
 
   final double _contentHeight = 70;
-  final double _verticalPadding = 10;
+  final double _topMargin = 10;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(
-        vertical: _verticalPadding
-      ),
+      margin: EdgeInsets.only(top: _topMargin),
       width: double.infinity,
-      color: Colors.orange,
       child: Container(
         height: _contentHeight,
-        color: Colors.green,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Stack(
           children: <Widget>[
+            AvatarStatus(),
             Container(
-              color: Colors.purpleAccent,
               child: Image.asset('assets/images/logo_tecnonautas_2x.png')
             ),
-            AvatarStatus()
           ],
         ),
       ),      
