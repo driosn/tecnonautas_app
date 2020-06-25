@@ -50,7 +50,6 @@ class _TriviasPageState extends State<TriviasPage> {
   void dispose() {
     super.dispose();
   
-    print('disposeeeee');
     // final portalHomeModel = Provider.of<PortalHomeModel>(context, listen: false);
     // portalHomeModel.isTriviasPage = false;
 
@@ -60,15 +59,12 @@ class _TriviasPageState extends State<TriviasPage> {
   Widget build(BuildContext context) {
 
     return Scaffold(
-      appBar: AppBar(
-        title: TecnonautasAppbar()
-      ),
       body: _BackgroundContainer(
         child: SafeArea(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              // TecnonautasHeader(),
+              TecnonautasAppbar(),
               Expanded(
                 child: ListView(
                   physics: BouncingScrollPhysics(),
