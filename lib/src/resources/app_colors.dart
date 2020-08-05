@@ -34,11 +34,17 @@ const Color greenPiece    = Color(0xff97C864);
 const Color orangePiece   = Color(0xffECA563);
 
 // Shadow Colors
-const Color lightGreyColor = Color(0xff848484);
+const Color lightGreyColor = Color(0xffA29F9F);
 const Color darkGreyColor = Color(0xff848484);
 
 // Special Colors
 const Color goldColor = Color(0xffFFA122);
+const Color beigeColor = Color(0xffEDD9B2);
 
 // Appbar Colors
 const Color levelBarColor = Color(0xff21A2DC);
+
+// Settings Colors
+const Color titleSettingColor = Color(0xffBCC5D3);
+const Color leadingColor = Color(0xff21A2DC);
+const Color titleTileColor = Color(0xff7B7979);

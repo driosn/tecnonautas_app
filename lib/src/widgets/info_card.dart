@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tecnonautas_app/src/resources/app_colors.dart';
+import 'package:tecnonautas_app/src/widgets/card_container.dart';
 
 class InfoCard extends StatelessWidget {
   
@@ -22,14 +23,10 @@ class InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: mHeight,
-      width: mWidth,
-      padding: EdgeInsets.all(_infoPadding),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(_infoBorderRadius)
-      ),
+    return CardContainer(
+      mHeight: mHeight,
+      mWidth: mWidth,
+      mPadding: EdgeInsets.all(_infoPadding),
       child: Column(
         children: <Widget>[
           Container(

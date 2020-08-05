@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tecnonautas_app/src/resources/app_colors.dart';
 
 class QuestionCard extends StatelessWidget {
   
@@ -29,7 +30,10 @@ class QuestionCard extends StatelessWidget {
       child: Center(
         child: Text(
           mQuestionLbl, 
-          style: Theme.of(context).textTheme.headline6.copyWith(fontWeight: FontWeight.w900),
+          style: Theme.of(context).textTheme.subtitle2.copyWith(
+            color: accent,
+            fontWeight: FontWeight.w900
+          ),
           textAlign: TextAlign.center,
         ),
       ),

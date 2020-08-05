@@ -1,5 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tecnonautas_app/core/bloc/active_trivia/active_trivia_bloc.dart';
+import 'package:tecnonautas_app/core/models/trivia.dart';
 import 'package:tecnonautas_app/src/pages/home/widgets/active_trivia_card.dart';
 import 'package:tecnonautas_app/src/pages/home/widgets/trivia_card_item.dart';
 import 'package:tecnonautas_app/src/providers/portal_home_model.dart';
@@ -116,7 +119,7 @@ class _TriviaListSection extends StatelessWidget {
             children: <Widget>[
               subtitleLabel(mIcon, mCategoryName),
               Spacer(),
-              RoundedButton(mHeight: 30, mWidth: 80, mText: 'Ver Todo', mRadius: 15)
+              RoundedButton(mHeight: 30, mWidth: 80, mText: Text('Ver Todo'), mRadius: 15)
             ],
           ),
           Container(
@@ -206,7 +209,29 @@ class _ActiveTrivia extends StatelessWidget {
             children: <Widget>[
               Text('Activa', style: Theme.of(context).textTheme.subtitle),
               SizedBox(height: 10),
-              ActiveTriviaCard()
+              // ActiveTriviaCard()
+
+              StreamBuilder<QuerySnapshot>(
+                stream: activeTriviaBloc.activeTriviaStream,
+                builder: (context, snapshot) {
+
+                  if (snapshot.hasData && snapshot.data.documents.length > 0) {
+                    // Trivia mTrivia = Trivia.fromSnapshot(snapshot.data.documents.first);
+
+                    // if (mTrivia.isActive) {
+                      return Text(
+                        'Existe una trivia Activa',
+                        style: TextStyle(color: Colors.greenAccent)
+                      );
+                    // }
+                  }
+                  
+                  return Text(
+                    'Ninguna trivia activa',
+                    style: TextStyle(color: Colors.redAccent)
+                  );
+                },
+              )
             ],
           ),
         ),

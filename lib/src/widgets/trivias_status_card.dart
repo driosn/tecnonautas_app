@@ -69,8 +69,8 @@ class TriviasStatusCard extends StatelessWidget {
                 ),
                 Text(
                   '$mLabel',
-                  style: Theme.of(context).textTheme.subtitle.copyWith(
-                    color: Colors.white, fontWeight: FontWeight.bold
+                  style: Theme.of(context).textTheme.subtitle2.copyWith(
+                    color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16
                   ),
                   textAlign: TextAlign.center,
                 )

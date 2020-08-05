@@ -2,11 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tecnonautas_app/src/pages/portal_home/portal_home_page.dart';
 import 'package:tecnonautas_app/src/providers/portal_home_model.dart';
+import 'package:tecnonautas_app/src/providers/push_notifications_provider.dart';
 import 'package:tecnonautas_app/src/router/router.dart';
  
 void main() => runApp(MyApp());
  
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+
+  @override
+  void initState() {
+    super.initState();
+
+    final pushProvider = new PushNotificationsProvider();
+    pushProvider.initNotifications();
+
+    pushProvider.mensajesStream.listen((argumento) {
+      
+      print('Argumento desde main: $argumento');
+
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -33,6 +54,11 @@ class MyApp extends StatelessWidget {
               fontSize: 18,
               fontWeight: FontWeight.bold
             ),
+            subhead: TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.bold
+            ) 
           )
         ),
         initialRoute: '/',

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tecnonautas_app/src/resources/borders.dart';
+import 'package:tecnonautas_app/src/widgets/card_container.dart';
 
 class TriviaStatusDescription extends StatelessWidget {
   
@@ -19,14 +20,10 @@ class TriviaStatusDescription extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(
+    return CardContainer(
+      mPadding: EdgeInsets.symmetric(
         horizontal: _horizontalPadding,
         vertical: _verticalPadding
-      ),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(normalBorderRadius),
-        color: Colors.white
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,

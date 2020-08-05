@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "775816760424",
+    "firebase_url": "https://tecnonautasapp-24d19.firebaseio.com",
+    "project_id": "tecnonautasapp-24d19",
+    "storage_bucket": "tecnonautasapp-24d19.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:775816760424:android:b4a92511137056067b3fdd",
+        "android_client_info": {
+          "package_name": "com.example.tecnonautas_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "775816760424-tu35ev6qo220brqgj8onu7fgie3jhm3r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.tecnonautas_app",
+            "certificate_hash": "08535594dcf73013e5c5fb5cc8bc7c7a9f7fc290"
+          }
+        },
+        {
+          "client_id": "775816760424-bd0gah1uv397h3ucjknb16em7ms356gi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD3lzECsSbTEMnvchdIB1DdSvKvxbd7aRg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "775816760424-bd0gah1uv397h3ucjknb16em7ms356gi.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

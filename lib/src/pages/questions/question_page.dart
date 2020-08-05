@@ -6,6 +6,7 @@ import 'package:tecnonautas_app/src/pages/questions/widgets/question_card.dart';
 import 'package:tecnonautas_app/src/pages/questions/widgets/timer_container.dart';
 import 'package:tecnonautas_app/src/pages/trivia_status/trivia_status_page.dart';
 import 'package:tecnonautas_app/src/resources/app_colors.dart';
+import 'package:tecnonautas_app/src/widgets/appbar/tecnonautas_appbar.dart';
 import 'package:tecnonautas_app/src/widgets/counter_bar.dart';
 import 'package:tecnonautas_app/src/widgets/puzzle_piece_button.dart';
 import 'package:tecnonautas_app/src/widgets/question_timer.dart';
@@ -25,25 +26,25 @@ class QuestionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Questions page'),
-      ),
       body: Container(
         padding: EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: <Widget>[
-            QuestionCard(mQuestionLbl: 'Cuál de los siguientes compuestos se representa con la fórmula: \nCO2',),
-            SizedBox(height: _spacingSize),
-            TimerContainer(
-              mSecondsDuration: 10,
-              mTimerBloc: _questionTimerBloc,
-            ),
-            SizedBox(height: _spacingSize * 2),
-            _questionActions(),
-            // ResultCard.correct(mResultDescription: 'El Dióxido de carbono se representa con CO2 porque tiene dos átomos de Oxígeno y uno de Carbono.'),
-            Spacer()
-          ],
+        child: SafeArea(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              TecnonautasAppbar(),
+              QuestionCard(mQuestionLbl: 'Cuál de los siguientes compuestos se representa con la fórmula: \nCO2',),
+              SizedBox(height: _spacingSize),
+              TimerContainer(
+                mSecondsDuration: 10,
+                mTimerBloc: _questionTimerBloc,
+              ),
+              SizedBox(height: _spacingSize * 2),
+              _questionActions(),
+              // ResultCard.correct(mResultDescription: 'El Dióxido de carbono se representa con CO2 porque tiene dos átomos de Oxígeno y uno de Carbono.'),
+              Spacer()
+            ],
+          ),
         ),
       ),
     );

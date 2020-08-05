@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:tecnonautas_app/src/pages/finished_trivia/widgets/leave_trivia_dialog.dart';
 import 'package:tecnonautas_app/src/pages/trivia_status/widgets/question_status_button.dart';
 import 'package:tecnonautas_app/src/pages/trivia_status/widgets/trivia_status_description.dart';
 import 'package:tecnonautas_app/src/resources/app_colors.dart';
+import 'package:tecnonautas_app/src/widgets/appbar/tecnonautas_appbar.dart';
+import 'package:tecnonautas_app/src/widgets/card_container.dart';
 import 'package:tecnonautas_app/src/widgets/info_card.dart';
+import 'package:tecnonautas_app/src/widgets/rounded_button.dart';
 
 class TriviaStatusPage extends StatelessWidget {
   
@@ -15,7 +19,6 @@ class TriviaStatusPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('TriviaStatusPage')),
       body: SingleChildScrollView(
         physics: BouncingScrollPhysics(),
         child: Container(
@@ -25,6 +28,8 @@ class TriviaStatusPage extends StatelessWidget {
           ),
           child: Column(
             children: <Widget>[
+              _CustomAppbar(),
+              SizedBox(height: _verticalSpacing),
               TriviaStatusDescription(
                 mTitle: 'Fórmulas Químicas',
                 mDescription: 'Las fórmulas químicas son la representación de los elementos que forman un compuesto y la proporción en que se encuentran.',
@@ -125,4 +130,52 @@ class TriviaStatusPage extends StatelessWidget {
 
   }
 
+}
+
+class _CustomAppbar extends StatelessWidget {
+  
+  final double _buttonRadius = 5;
+  final double _buttonHeight = 30;
+  final double _buttonWidth = 125;
+  final double _appBarPadding = 10;
+  final double _fontSize = 11;
+
+  @override
+  Widget build(BuildContext context) {
+    return CardContainer(
+      mPadding: EdgeInsets.all(_appBarPadding),
+      mWidth: double.infinity,
+      child: Column(
+        children: <Widget>[
+          TecnonautasAppbar(),
+          Align(
+            alignment: Alignment.centerRight,
+            child: RoundedButton(
+              mOnPressed: () => _leaveTrivia(context),
+              mColor: beigeColor,
+              mHeight: _buttonHeight, 
+              mWidth: _buttonWidth, 
+              mText: Text(
+                'Abandonar Trivia', 
+                style: TextStyle(fontSize: _fontSize, fontWeight: FontWeight.w500),
+              ), 
+              mRadius: _buttonRadius,
+            )
+          )
+        ],
+      ),
+    );
+  }
+
+  void _leaveTrivia(BuildContext context) {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) {
+
+        return LeaveTriviaDialog();
+
+      }
+    );
+  }
 }
