@@ -63,11 +63,11 @@ class _AvatarInfo extends StatelessWidget {
                 children: <Widget>[
                   TecnonautasAppbar(),
                   _AvatarSummary(),
-                  Text(
-                    'TRIVIAS', 
-                    style: TextStyle(fontWeight: FontWeight.bold, color: darkGrey)
-                  ),
-                  _TriviaStatusSection(),
+                  // Text(
+                    // 'TRIVIAS', 
+                    // style: TextStyle(fontWeight: FontWeight.bold, color: darkGrey)
+                  // ),
+                  // _TriviaStatusSection(),
                 ],
               ),
             ),

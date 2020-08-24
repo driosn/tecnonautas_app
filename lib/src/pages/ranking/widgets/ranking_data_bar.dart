@@ -65,7 +65,6 @@ class RankingDataBar extends StatelessWidget {
               )
             )
           )
-
         ],
       ),
     );
