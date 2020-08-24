@@ -52,7 +52,7 @@ class _MyAppState extends State<MyApp> {
           const Locale('es', 'ES')
         ],
         debugShowCheckedModeBanner: false,
-        title: 'Material App',
+        title: 'Tecnonautas App',
         theme: ThemeData(
           brightness: Brightness.light,
           primaryColor: Color(0xff40C1D4),
