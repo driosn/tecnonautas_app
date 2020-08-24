@@ -1,10 +1,14 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tecnonautas_app/core/bloc/user_ranking/user_ranking_bloc.dart';
+import 'package:tecnonautas_app/core/models/user_ranking.dart';
 import 'package:tecnonautas_app/src/pages/ranking/widgets/ranking_data_bar.dart';
 import 'package:tecnonautas_app/src/pages/ranking/widgets/ranking_data_own.dart';
 import 'package:tecnonautas_app/src/pages/ranking/widgets/ranking_data_simple.dart';
 import 'package:tecnonautas_app/src/providers/portal_home_model.dart';
 import 'package:tecnonautas_app/src/resources/app_colors.dart';
+import 'package:tecnonautas_app/src/utils/user_preferences.dart';
 import 'package:tecnonautas_app/src/widgets/appbar/tecnonautas_appbar.dart';
 import 'package:tecnonautas_app/src/widgets/gradient_container.dart';
 import 'package:tecnonautas_app/src/widgets/trivias_status_card.dart';
@@ -111,25 +115,62 @@ class _TriviaStatusSection extends StatelessWidget {
 
   class _AvatarSummary extends StatelessWidget {
     
+    UserPreferences prefs = UserPreferences();
+
     @override
     Widget build(BuildContext context) {
       
       final ownProfileItems = <RankingDataItem> [
         RankingDataItem(
-          mTitle: _rankingTitle(context, 'Puesto:', accentBlue),
-          mContent: _rankingContent(context, '8', Colors.black),
-          mTrailing: _iconTrailing(Icons.star, accentBlue),
-          mBackgroundColor: lightBlue
-        ),
-        RankingDataItem(
-          mTitle: _rankingTitle(context, 'David', accentPurple),
-          mContent: _rankingContent(context, '158', Colors.black),
+          mTitle: _rankingTitle(context, 'Puesto', accentPurple),
+          mContent: StreamBuilder<QuerySnapshot>(
+            stream: userRankingBloc.queryUserRankingStream,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                QuerySnapshot querySnapshotResponse = snapshot.data;
+                List<UserRanking> auxiliarUserRankingList = List<UserRanking>();
+
+                querySnapshotResponse.documents.forEach((document) {
+                  auxiliarUserRankingList.add(UserRanking.fromSnapshotData(document.data));
+                });
+                auxiliarUserRankingList.sort((userRankingA, userRankingB) => userRankingB.points.compareTo(userRankingA.points));
+
+                int myOwnPosition = auxiliarUserRankingList.indexWhere((element) => element.userId == prefs.id);
+                return _rankingContent(context, "${myOwnPosition + 1}", accent);
+              }
+
+              return _rankingContent(context, "0", accent);
+            },
+          ),
           mTrailing: _iconTrailing(Icons.face, accentPurple),
           mBackgroundColor: lightPink
         ),
         RankingDataItem(
-          mTitle: _rankingTitle(context, 'David', accentYellow),
-          mContent: _rankingContent(context, '131', Colors.black),
+          mTitle: _rankingTitle(context, 'Puntos:', accentBlue),
+          mContent: StreamBuilder<QuerySnapshot>(
+            stream: userRankingBloc.queryUserRankingStream,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                QuerySnapshot querySnapshotResponse = snapshot.data;
+                List<UserRanking> auxiliarUserRankingList = List<UserRanking>();
+
+                querySnapshotResponse.documents.forEach((document) {
+                  auxiliarUserRankingList.add(UserRanking.fromSnapshotData(document.data));
+                });
+
+                UserRanking myOwnUserRanking = auxiliarUserRankingList.firstWhere((userRanking) => userRanking.userId == prefs.id);
+                return _rankingContent(context, "${myOwnUserRanking.points.toStringAsFixed(0)}", accent);
+              }
+
+              return _rankingContent(context, "0", accent);
+            },
+          ),
+          mTrailing: _iconTrailing(Icons.star, accentBlue),
+          mBackgroundColor: lightBlue
+        ),
+        RankingDataItem(
+          mTitle: _rankingTitle(context, 'Monedas', accentYellow),
+          mContent: _rankingContent(context, '0', Colors.black),
           mTrailing: _iconTrailing(Icons.android, accentYellow),
           mBackgroundColor: lightYellow
         ),
@@ -172,42 +213,55 @@ class _TriviaRanking extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 24),
-        child: ListView(
-          physics: BouncingScrollPhysics(),
-          children: <Widget>[
-            SizedBox(height: 10),
-            RankingDataSimple(
-              mItem: RankingDataItem(
-                mTitle: _rankingTitle(context, 'David'),
-                mContent: _rankingContent(context, '123 puntos'),
-                mTrailing: _rankingTrailing(context, '1'),
-                mBackgroundColor: accentLight
-              ),
-            ),
-            SizedBox(height: 15),
-            RankingDataSimple(
-              mItem: RankingDataItem(
-                mTitle: _rankingTitle(context, 'Juan'),
-                mContent: _rankingContent(context, '123 puntos'),
-                mTrailing: _rankingTrailing(context, '2'),
-                mBackgroundColor: accentLight
-              ),
-            ),
-            SizedBox(height: 15),
-            RankingDataSimple(
-              mItem: RankingDataItem(
-                mTitle: _rankingTitle(context, 'Pedro'),
-                mContent: _rankingContent(context, '123 puntos'),
-                mTrailing: _rankingTrailing(context, '3'),
-                mBackgroundColor: accentLight
-              ),
-            )
-          ],
+        padding: EdgeInsets.only(
+          left: 24,
+          right: 24,
+          top: 12
         ),
+        child: StreamBuilder<QuerySnapshot>(
+          stream: userRankingBloc.queryUserRankingStream,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              QuerySnapshot querySnapshotResponse = snapshot.data;
+              List<UserRanking> auxiliarUserRankingList = List<UserRanking>();
+
+              querySnapshotResponse.documents.forEach((document) {
+                auxiliarUserRankingList.add(UserRanking.fromSnapshotData(document.data));
+              });
+              auxiliarUserRankingList.sort((userRankingA, userRankingB) => userRankingB.points.compareTo(userRankingA.points));
+
+              return ListView.separated(
+                physics: BouncingScrollPhysics(),
+                separatorBuilder: (context, index) => SizedBox(height: 15),
+                itemCount: auxiliarUserRankingList.length > 3 ? 3 : auxiliarUserRankingList.length,
+                itemBuilder: (context, index) {
+
+                  return RankingDataSimple(
+                    mItem: RankingDataItem(
+                      mTitle: _rankingTitle(context, auxiliarUserRankingList[index].username), 
+                      mContent: _rankingContent(context, '${auxiliarUserRankingList[index].points.toStringAsFixed(0)} puntos'), 
+                      mTrailing: _rankingTrailing(context, (index + 1).toString())
+                    ),
+                    mAvatar: auxiliarUserRankingList[index].userAvatar,
+                  );
+                }
+              );
+            }
+
+            return Center(
+              child: Text('No existe un ranking de jugadores aún'),
+            );
+          },
+        )
+
       ),
     );
   }
+
+  void updateSignalPoints() {
+
+  }
+
 
   Widget _rankingTitle(BuildContext context, String mText) {
     return Text(

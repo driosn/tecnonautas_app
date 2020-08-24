@@ -1,19 +1,28 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:tecnonautas_app/core/bloc/active_trivia/active_trivia_bloc.dart';
+import 'package:tecnonautas_app/core/bloc/user_trivia_ranking/user_trivia_ranking_bloc.dart';
 import 'package:tecnonautas_app/src/resources/app_colors.dart';
+import 'package:tecnonautas_app/src/utils/user_preferences.dart';
 import 'package:tecnonautas_app/src/widgets/card_container.dart';
 import 'package:tecnonautas_app/src/widgets/tecnonautas_circular_avatar.dart';
 
 class AvatarTriviaInfo extends StatelessWidget {
   
-  final int finalCoins;
+  final String mTriviaId;
+
+  final int finalScore;
   final int avatarRanking;
   final int totalPlayers;
 
   AvatarTriviaInfo({
-    @required this.finalCoins,
+    @required this.mTriviaId,
+    @required this.finalScore,
     @required this.avatarRanking,
     @required this.totalPlayers
   });
+
+  UserPreferences prefs = UserPreferences();
 
   final double _cardPadding = 15;
 
@@ -37,7 +46,7 @@ class AvatarTriviaInfo extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         TecnonautasCircularAvatar.medium(
-          mAvatarImage: AssetImage('assets/images/avatar.jpg')
+          mAvatarImage: AssetImage('assets/images/avatars/${prefs.avatar}.png')
         ),
         SizedBox(width: _dataSpacing),
         _avatarTriviaData(context)
@@ -61,7 +70,7 @@ class AvatarTriviaInfo extends StatelessWidget {
   }
 
   Widget _nameLabel(BuildContext context) {
-    return Text('David', style: Theme.of(context).textTheme.subtitle2);
+    return Text(prefs.username, style: Theme.of(context).textTheme.subtitle2);
   }
 
   Widget _coinLabel(BuildContext context) {
@@ -69,13 +78,29 @@ class AvatarTriviaInfo extends StatelessWidget {
 
     return Row(
       children: <Widget>[
-        Text('Monedas ganadas: ', style: Theme.of(context).textTheme.subtitle2.copyWith(
-          fontWeight: FontWeight.normal, color: goldColor
+        Text('Puntos ganados: ', style: Theme.of(context).textTheme.subtitle2.copyWith(
+          fontWeight: FontWeight.normal
         )),
         SizedBox(width: _wordSpace),
-        Text('6', style: Theme.of(context).textTheme.subtitle2.copyWith(color: goldColor)),
-        SizedBox(width: _wordSpace),
-        Image.asset('assets/images/gold_coin.png')
+        StreamBuilder<DocumentSnapshot>(
+          stream: Firestore.instance
+                           .collection("userTriviaRanking")
+                           .document(mTriviaId)
+                           .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              DocumentSnapshot snapshotResponse = snapshot.data;
+              Map<String, dynamic> ownProfileData = Map<String, dynamic>();
+
+              ownProfileData = snapshotResponse.data["ranking"].firstWhere((element) => element["userId"] == prefs.id);
+
+              return Text(ownProfileData["points"].toStringAsFixed(2), style: Theme.of(context).textTheme.subtitle2.copyWith(
+                color: Colors.black45, fontWeight: FontWeight.normal
+              ));
+            }
+            return Container();
+          },
+        )
       ],
     );
   }
@@ -89,9 +114,31 @@ class AvatarTriviaInfo extends StatelessWidget {
           fontWeight: FontWeight.normal
         )),
         SizedBox(width: _wordSpace),
-        Text('$avatarRanking de $totalPlayers', style: Theme.of(context).textTheme.subtitle2.copyWith(
-          color: Colors.black45, fontWeight: FontWeight.normal
-        )),
+        StreamBuilder<DocumentSnapshot>(
+          stream: Firestore.instance
+                           .collection("userTriviaRanking")
+                           .document(mTriviaId)
+                           .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              DocumentSnapshot snapshotResponse = snapshot.data;
+              List<Map<String, dynamic>> usersInThisTrivia = List<Map<String, dynamic>>();
+
+              snapshotResponse.data["ranking"].forEach((user) {
+                usersInThisTrivia.add(Map<String, dynamic>.from(user));
+              });
+              
+              usersInThisTrivia.sort((userA, userB) => userB["points"].compareTo(userA["points"]));
+              int userPosition = usersInThisTrivia.indexWhere((element) => element["userId"] == prefs.id);
+              userPosition++;
+
+              return Text('$userPosition de ${snapshotResponse.data["ranking"].length}', style: Theme.of(context).textTheme.subtitle2.copyWith(
+                color: Colors.black45, fontWeight: FontWeight.normal
+              ));
+            }
+            return Container();
+          },
+        )
       ],
     );
   }

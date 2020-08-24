@@ -209,26 +209,23 @@ class _ActiveTrivia extends StatelessWidget {
             children: <Widget>[
               Text('Activa', style: Theme.of(context).textTheme.subtitle),
               SizedBox(height: 10),
-              // ActiveTriviaCard()
-
+ 
               StreamBuilder<QuerySnapshot>(
                 stream: activeTriviaBloc.activeTriviaStream,
                 builder: (context, snapshot) {
 
                   if (snapshot.hasData && snapshot.data.documents.length > 0) {
-                    // Trivia mTrivia = Trivia.fromSnapshot(snapshot.data.documents.first);
+                    Trivia mTrivia = Trivia.fromSnapshot(snapshot.data.documents.first);
 
-                    // if (mTrivia.isActive) {
-                      return Text(
-                        'Existe una trivia Activa',
-                        style: TextStyle(color: Colors.greenAccent)
-                      );
-                    // }
+                    return ActiveTriviaCard(
+                      mTrivia: mTrivia,
+                    );
+
                   }
                   
                   return Text(
                     'Ninguna trivia activa',
-                    style: TextStyle(color: Colors.redAccent)
+                    style: TextStyle(color: Colors.white)
                   );
                 },
               )

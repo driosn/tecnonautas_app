@@ -1,8 +1,16 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:tecnonautas_app/core/bloc/active_trivia/active_trivia_bloc.dart';
+import 'package:tecnonautas_app/core/bloc/select_active_trivia/selected_trivia_bloc.dart';
+import 'package:tecnonautas_app/core/bloc/selected_answer/selected_answer_bloc.dart';
+import 'package:tecnonautas_app/core/bloc/user_ranking/user_ranking_bloc.dart';
+import 'package:tecnonautas_app/core/models/user_answer.dart';
+import 'package:tecnonautas_app/core/models/user_trivia_answers.dart';
 import 'package:tecnonautas_app/src/pages/finished_trivia/widgets/avatar_trivia_info.dart';
 import 'package:tecnonautas_app/src/pages/finished_trivia/widgets/leave_trivia_dialog.dart';
 import 'package:tecnonautas_app/src/pages/finished_trivia/widgets/response_average_bar.dart';
 import 'package:tecnonautas_app/src/resources/app_colors.dart';
+import 'package:tecnonautas_app/src/utils/user_preferences.dart';
 import 'package:tecnonautas_app/src/widgets/appbar/tecnonautas_appbar.dart';
 import 'package:tecnonautas_app/src/widgets/card_container.dart';
 import 'package:tecnonautas_app/src/widgets/favorite_button.dart';
@@ -22,6 +30,8 @@ class FinishedTriviaPage extends StatelessWidget {
   final double _buttonWidth = 200;
 
   final double _appbarPadding = 10;
+
+  SelectedActiveTriviaBloc selectedActiveTriviaBloc = SelectedActiveTriviaBloc();
 
   @override
   Widget build(BuildContext context) {
@@ -43,8 +53,9 @@ class FinishedTriviaPage extends StatelessWidget {
                       _TitleCard(title: 'Fórmulas Químicas'),
                       SizedBox(height: _spacingValue),
                       AvatarTriviaInfo(
+                        mTriviaId: selectedAnswerBloc.parentTrivia.id,
                         avatarRanking: 3,
-                        finalCoins: 6,
+                        finalScore: 6,
                         totalPlayers: 232,
                       ),
                       SizedBox(height: _spacingValue),
@@ -52,7 +63,8 @@ class FinishedTriviaPage extends StatelessWidget {
                       SizedBox(height: _spacingValue),
                       _QuestionsStatus(),
                       SizedBox(height: _spacingValue),
-                      _QuestionStatusList(),
+                      // _QuestionStatusList(),
+                      _questionsStatusList(),
                       SizedBox(height: _spacingValue * 2),
                       GradientButton(
                         mWidth: _buttonWidth,
@@ -73,6 +85,99 @@ class FinishedTriviaPage extends StatelessWidget {
         ),
       )
     );
+  }
+
+  Widget _questionsStatusList() {
+    return StreamBuilder(
+      stream: activeTriviaBloc.activeTriviaQuestionsStream,
+      builder: (context, snapshot) {
+      
+        if (snapshot.hasData) {
+          QuerySnapshot response = snapshot.data;
+          DocumentSnapshot document = response.documents.first;
+
+          final data = document.data;
+          List<dynamic> questions = data["questions"];
+          
+          return StreamBuilder<DocumentSnapshot>(
+            stream: activeTriviaBloc.userTriviaAnswersStream,
+            builder: (context, snapshot) {
+            
+              if (snapshot.hasData) {
+                UserTriviaAnswers userTriviaAnswers = UserTriviaAnswers.fromDocument(snapshot.data.data);                
+                UserAnswer userAnswer = searchTriviaNameData(userTriviaAnswers);
+
+                return SingleChildScrollView(
+                  child: Column(
+                    children: List.generate(questions.length, (index) {
+                    
+                        Map<String, dynamic> auxMap = Map<String, dynamic>.from(questions[index]);
+
+                        if (auxMap["isActive"] == true) {
+                          if (userAnswer.responses[auxMap["name"]] != null || userAnswer.responses[auxMap["name"]].length > 0) {
+                            if (userAnswer.responses[auxMap["name"]] == selectedActiveTriviaBloc.selectedActiveTrivia.respCorrect["question$index"]) {
+                              return QuestionStatusButton.correct(
+                                mPointsNumber: 2.5, 
+                                mQuestionNumber: index + 1, 
+                                mOnPressed: () {}
+                              );
+                            }
+                            return QuestionStatusButton.incorrect(
+                              mPointsNumber: 2.5, 
+                              mQuestionNumber: 1, 
+                              mOnPressed: () {}
+                            );
+                          }
+                        }
+
+                        if (auxMap["wasPlayed"]) {
+                          if (userAnswer.responses[auxMap["name"]] == selectedActiveTriviaBloc.selectedActiveTrivia.respCorrect["question$index"]) {
+                            return QuestionStatusButton.correct(
+                              mPointsNumber: 2.5, 
+                              mQuestionNumber: index + 1, 
+                              mOnPressed: () {}
+                            );
+                          }
+                          if (userAnswer.responses[auxMap["name"]] == "" || userAnswer.responses[auxMap["name"]] == "No respondido") {
+                            return QuestionStatusButton.notAnswered(
+                              mQuestionNumber: index + 1, 
+                              mOnPressed: () {}
+                            );
+                          }
+                          return QuestionStatusButton.incorrect(
+                            mPointsNumber: 2.5, 
+                            mQuestionNumber: index + 1, 
+                            mOnPressed: () {}
+                          );
+                        }
+                        return QuestionStatusButton.incorrect(
+                          mPointsNumber: 2.5, 
+                          mQuestionNumber: index + 1, 
+                          mOnPressed: () {}
+                        );                         
+                      }
+                    ),
+                  )
+                );
+              }
+              return Container();
+              
+            }
+          );
+        }
+
+        return Container();
+
+      },
+    );
+  }
+
+  UserAnswer searchTriviaNameData(UserTriviaAnswers mUserTriviaAnswers) {
+    Map<String, dynamic> foundedData = mUserTriviaAnswers.answers.firstWhere(
+      (answer) {
+        return answer["triviaName"] == selectedActiveTriviaBloc.selectedActiveTrivia.name;
+    });
+    return UserAnswer.fromMap(foundedData);
   }
 
   Widget _buttonContent(BuildContext context) {
@@ -150,7 +255,6 @@ class _TitleCard extends StatelessWidget {
     return Text('Trivia', style: TextStyle(color: lightGreyColor),);
   }
 
-  // TODO: Action when favorite button is tapped
   void _checkFavorite() {
 
   }
@@ -211,6 +315,13 @@ class _QuestionsStatus extends StatelessWidget {
   
   final double _cardHeight = 120;
 
+  final Stream<DocumentSnapshot> userDocumentStream = Firestore.instance
+                      .collection("userTriviaRanking")
+                      .document(selectedActiveTriviaBloc.selectedActiveTrivia.id)
+                      .snapshots();
+
+  UserPreferences prefs = UserPreferences();
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -220,24 +331,61 @@ class _QuestionsStatus extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Expanded(
-            child: TriviasStatusCard.correct(
-              mLabel: 'Correctas', 
-              mTriviasNumber: 3,
-              mHeight: _cardHeight,
-            ),
+            child: StreamBuilder(
+              stream: userDocumentStream,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  DocumentSnapshot documentSnapshot = snapshot.data;
+                  Map<String, dynamic> ownProfileData = Map<String, dynamic>();
+
+                  ownProfileData = documentSnapshot.data["ranking"].firstWhere((element) => element["userId"] == prefs.id);
+
+                  return TriviasStatusCard.correct(
+                    mLabel: 'Correctas', 
+                    mTriviasNumber: ownProfileData["correct"]
+                  );
+                }
+                return Container();
+              },
+            )
           ),
           Expanded(
-            child: TriviasStatusCard.wrong(
-              mLabel: 'Incorrectas',
-              mTriviasNumber: 1,
-              mHeight: _cardHeight,
-            ),
+            child: StreamBuilder(
+              stream: userDocumentStream,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  DocumentSnapshot documentSnapshot = snapshot.data;
+                  Map<String, dynamic> ownProfileData = Map<String, dynamic>();
+
+                  ownProfileData = documentSnapshot.data["ranking"].firstWhere((element) => element["userId"] == prefs.id);
+
+                  return TriviasStatusCard.wrong(
+                    mLabel: 'Incorrectas', 
+                    mTriviasNumber: ownProfileData["wrong"]
+                  );
+                }
+                return Container();
+              },
+            )
           ),
           Expanded(
-            child: TriviasStatusCard.neutral(
-              mLabel: 'Sin respuesta', 
-              mTriviasNumber: 0,
-            ),
+            child: StreamBuilder(
+              stream: userDocumentStream,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  DocumentSnapshot documentSnapshot = snapshot.data;
+                  Map<String, dynamic> ownProfileData = Map<String, dynamic>();
+
+                  ownProfileData = documentSnapshot.data["ranking"].firstWhere((element) => element["userId"] == prefs.id);
+
+                  return TriviasStatusCard.neutral(
+                    mLabel: 'Sin respuesta', 
+                    mTriviasNumber: ownProfileData["notAnswered"]
+                  );
+                }
+                return Container();
+              },
+            )
           )
         ],
       ),

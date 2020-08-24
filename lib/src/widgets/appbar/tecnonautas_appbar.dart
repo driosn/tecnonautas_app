@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:tecnonautas_app/src/pages/settings/settings_page.dart';
+import 'package:tecnonautas_app/src/utils/user_preferences.dart';
 import 'package:tecnonautas_app/src/widgets/appbar/avatar_level_bar.dart';
 import 'package:tecnonautas_app/src/widgets/appbar/avatar_status.dart';
 
 class TecnonautasAppbar extends StatelessWidget {
 
   final Color mBackgroundColor;
+  UserPreferences prefs = UserPreferences();
 
   TecnonautasAppbar({
     this.mBackgroundColor = Colors.white
@@ -23,9 +26,10 @@ class TecnonautasAppbar extends StatelessWidget {
         child: Stack(
           children: <Widget>[
             AvatarStatus(),
+            
             Container(
               child: Image.asset('assets/images/logo_tecnonautas_2x.png')
-            ),
+            )
           ],
         ),
       ),      

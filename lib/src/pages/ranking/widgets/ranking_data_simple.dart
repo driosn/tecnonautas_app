@@ -8,9 +8,14 @@ export 'package:tecnonautas_app/src/pages/ranking/widgets/ranking_data_bar.dart'
 class RankingDataSimple extends StatelessWidget {
 
   final RankingDataItem mItem;
+  final String mAvatar;
   double mWidth;
 
-RankingDataSimple({@required this.mItem, this.mWidth}) {
+RankingDataSimple({
+  @required this.mItem, 
+  this.mWidth,
+  @required this.mAvatar
+}) {
   if(this.mWidth != null && this.mWidth < 300) this.mWidth = 300;
 }
 
@@ -33,7 +38,7 @@ RankingDataSimple({@required this.mItem, this.mWidth}) {
               ),
             ),
             TecnonautasCircularAvatar.medium(
-              mAvatarImage: AssetImage('assets/images/avatar.jpg')
+              mAvatarImage: AssetImage('assets/images/avatars/$mAvatar.png')
             ),
           ],
         ),

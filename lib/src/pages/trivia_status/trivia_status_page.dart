@@ -1,5 +1,16 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:tecnonautas_app/core/bloc/active_trivia/active_trivia_bloc.dart';
+import 'package:tecnonautas_app/core/bloc/question/selected_question_bloc.dart';
+import 'package:tecnonautas_app/core/bloc/select_active_trivia/selected_trivia_bloc.dart';
+import 'package:tecnonautas_app/core/bloc/selected_answer/selected_answer_bloc.dart';
+import 'package:tecnonautas_app/core/models/question.dart';
+import 'package:tecnonautas_app/core/models/trivia.dart';
+import 'package:tecnonautas_app/core/models/user_answer.dart';
+import 'package:tecnonautas_app/core/models/user_trivia_answers.dart';
+import 'package:tecnonautas_app/src/pages/finished_trivia/finished_trivia_page.dart';
 import 'package:tecnonautas_app/src/pages/finished_trivia/widgets/leave_trivia_dialog.dart';
+import 'package:tecnonautas_app/src/pages/play/play_page.dart';
 import 'package:tecnonautas_app/src/pages/trivia_status/widgets/question_status_button.dart';
 import 'package:tecnonautas_app/src/pages/trivia_status/widgets/trivia_status_description.dart';
 import 'package:tecnonautas_app/src/resources/app_colors.dart';
@@ -10,6 +21,10 @@ import 'package:tecnonautas_app/src/widgets/rounded_button.dart';
 
 class TriviaStatusPage extends StatelessWidget {
   
+  final Trivia mTrivia;
+
+  TriviaStatusPage({@required this.mTrivia});
+
   final double _horizontalPadding = 10;
   final double _verticalPadding = 15;
   final double _cardHeight = 160;
@@ -18,7 +33,7 @@ class TriviaStatusPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final triviaStatusPage = Scaffold(
       body: SingleChildScrollView(
         physics: BouncingScrollPhysics(),
         child: Container(
@@ -31,8 +46,8 @@ class TriviaStatusPage extends StatelessWidget {
               _CustomAppbar(),
               SizedBox(height: _verticalSpacing),
               TriviaStatusDescription(
-                mTitle: 'Fórmulas Químicas',
-                mDescription: 'Las fórmulas químicas son la representación de los elementos que forman un compuesto y la proporción en que se encuentran.',
+                mTitle: mTrivia.name,
+                mDescription: mTrivia.description,
                 mIsFavorite: false,
               ),
               SizedBox(height: _verticalSpacing),
@@ -43,6 +58,46 @@ class TriviaStatusPage extends StatelessWidget {
           ),
         ),
       ),
+    );
+    
+    return StreamBuilder(
+      stream: activeTriviaBloc.activeTriviaQuestionsStream,
+      builder: (context, snapshot) {
+
+        if (snapshot.hasData) {
+          QuerySnapshot response = snapshot.data;
+          DocumentSnapshot document = response.documents.first;
+
+          final data = document.data;
+          List<dynamic> questions = data["questions"];
+
+          bool completedTrivia = true;
+          for(int i = 0; i < questions.length - 1; i++) {
+            if(questions[i]["wasPlayed"] == false) completedTrivia = false;
+          } 
+
+          if (completedTrivia) {
+            return StreamBuilder<DocumentSnapshot>(
+              stream: activeTriviaBloc.userTriviaAnswersStream,
+              builder: (context, snapshot) {
+
+                if (snapshot.hasData) {
+                  UserTriviaAnswers userTriviaAnswers = UserTriviaAnswers.fromDocument(snapshot.data.data);                
+                  UserAnswer userAnswer = searchTriviaNameData(userTriviaAnswers);
+
+                  if (userAnswer.responses["${questions.last["name"]}"] != null && userAnswer.responses["${questions.last["name"]}"] != "") {
+                    return FinishedTriviaPage();
+                  }
+                  return triviaStatusPage;
+                }
+                return Container();     
+              }
+            );
+          }
+          return triviaStatusPage;
+        }
+        return Container();
+      },
     );
   }
 
@@ -77,7 +132,7 @@ class TriviaStatusPage extends StatelessWidget {
               mHeight: _cardHeight, 
               mTitle: 'Responde', 
               mIcon: Icon(Icons.ac_unit, color: accent), 
-              mChild: _cardContent(context, '4', 'Preguntas \n(lo antes posible)', isGold: false)
+              mChild: _cardContent(context, mTrivia.questions.length.toString(), 'Preguntas \n(lo antes posible)', isGold: false)
             ),
           ),
           SizedBox(width: _horizontalSpacing),
@@ -86,7 +141,7 @@ class TriviaStatusPage extends StatelessWidget {
               mHeight: _cardHeight, 
               mTitle: 'Gana', 
               mIcon: Image.asset('assets/images/gold_coin.png'), 
-              mChild: _cardContent(context, '4', 'Preguntas \n(lo antes posible)', isGold: true)
+              mChild: _cardContent(context, mTrivia.points.toString(), 'Puntos', isGold: true)
             ),
           ),
         ],
@@ -95,39 +150,139 @@ class TriviaStatusPage extends StatelessWidget {
   }
 
   Widget _questionsStatusList() {
-    return Container(
-      child: Column(
-        children: <Widget>[
-          QuestionStatusButton.correct(
-            mPointsNumber: 0, 
-            mQuestionNumber: 1,
-            mOnPressed:_questionButtonAction,
-          ),
-          SizedBox(height: 10),
-          QuestionStatusButton.incorrect(
-            mPointsNumber: 2.5, 
-            mQuestionNumber: 2,
-            mOnPressed: _questionButtonAction,
-          ),
-          SizedBox(height: 10),
-          QuestionStatusButton.ready(
-            mPointsNumber: 2.5, 
-            mQuestionNumber: 3,
-            mOnPressed: _questionButtonAction,
-          ),
-          SizedBox(height: 10),
-          QuestionStatusButton.waiting(
-            mPointsNumber: 2.5, 
-            mQuestionNumber: 4,
-            mOnPressed: _questionButtonAction,
-          ),
-        ],
-      ),
+    return StreamBuilder(
+      stream: activeTriviaBloc.activeTriviaQuestionsStream,
+      builder: (context, snapshot) {
+
+        if (snapshot.hasData) {
+          QuerySnapshot response = snapshot.data;
+          DocumentSnapshot document = response.documents.first;
+
+          final data = document.data;
+          List<dynamic> questions = data["questions"];
+          
+          return StreamBuilder<DocumentSnapshot>(
+            stream: activeTriviaBloc.userTriviaAnswersStream,
+            builder: (context, snapshot) {
+
+              if (snapshot.hasData) {
+                UserTriviaAnswers userTriviaAnswers = UserTriviaAnswers.fromDocument(snapshot.data.data);                
+                UserAnswer userAnswer = searchTriviaNameData(userTriviaAnswers);
+
+                return SingleChildScrollView(
+                  child: Column(
+                    children: List.generate(questions.length, (index) {
+                    
+                        Map<String, dynamic> auxMap = Map<String, dynamic>.from(questions[index]);
+
+                        if (auxMap["isActive"] == true) {
+                          if (userAnswer.responses[auxMap["name"]] == null || userAnswer.responses[auxMap["name"]].length > 0) {
+                            if (userAnswer.responses[auxMap["name"]] == mTrivia.respCorrect["question$index"]) {
+                              return QuestionStatusButton.correct(
+                                  mPointsNumber: 2.5, 
+                                  mQuestionNumber: 1, 
+                                  mOnPressed: () {}
+                                );
+                              }
+                              return QuestionStatusButton.incorrect(
+                                mPointsNumber: 2.5, 
+                                mQuestionNumber: 1, 
+                                mOnPressed: () {}
+                              );
+                          }
+                          return QuestionStatusButton.ready(
+                            mPointsNumber: 2.5, 
+                            mQuestionNumber: 3, 
+                            mOnPressed: () {
+                            SelectedAnswerBloc bloc = SelectedAnswerBloc()
+                              ..changeUserAnswer(userAnswer)
+                              ..changeQuestion(auxMap["name"])
+                              ..changeParentTrivia(mTrivia);
+
+                              _selectQuestion(auxMap["name"], index);
+                              _goToQuestion(context);
+                            }
+                          );
+                        }
+
+                        if (auxMap["wasPlayed"]) {
+                          if (userAnswer.responses[auxMap["name"]] == mTrivia.respCorrect["question$index"]) {
+                            return QuestionStatusButton.correct(
+                              mPointsNumber: 2.5, 
+                              mQuestionNumber: index + 1, 
+                              mOnPressed: () {}
+                            );
+                          }
+                          if (userAnswer.responses[auxMap["name"]] == "" || userAnswer.responses[auxMap["name"]] == "No respondido") {
+                            return QuestionStatusButton.notAnswered(
+                              mQuestionNumber: index + 1, 
+                              mOnPressed: () {}
+                            );
+                          }
+                          return QuestionStatusButton.incorrect(
+                            mPointsNumber: 2.5, 
+                            mQuestionNumber: index + 1, 
+                            mOnPressed: () {}
+                          );
+                        } 
+                        
+                        return QuestionStatusButton.waiting(
+                          mPointsNumber: 2.5, 
+                          mQuestionNumber: index + 1, 
+                          mOnPressed: () {}
+                        );
+                      }
+                    ),
+                  )
+                );
+              }
+              return Container();
+              
+            }
+          );
+        }
+
+        return Container();
+
+      },
     );
   }
 
-  void _questionButtonAction() {
+  UserAnswer searchTriviaNameData(UserTriviaAnswers mUserTriviaAnswers) {
+    Map<String, dynamic> foundedData = mUserTriviaAnswers.answers.firstWhere(
+      (answer) {
+        return answer["triviaName"] == selectedActiveTriviaBloc.selectedActiveTrivia.name;
+    });
+    return UserAnswer.fromMap(foundedData);
+  }
 
+  void _selectQuestion(String mQuestionName, int pressedIndex) {
+    int questionIndex = -1;
+
+    for(int i = 0; i < mTrivia.questions.length; i++) {
+      if (mTrivia.questions[i] == mQuestionName) questionIndex = i;
+    }
+
+    Question question  = Question(
+      questionIndex: pressedIndex,
+      qtyResp: mTrivia.qtyResp["question$questionIndex"],
+      questionTime: mTrivia.questionTime["question$questionIndex"],
+      questionLbl: mTrivia.questions[questionIndex],
+      respCorrect: mTrivia.respCorrect["question$questionIndex"],
+      responses: mTrivia.responses["question$questionIndex"]
+    );
+  
+    selectedQuestionBloc.changeParentTrivia(mTrivia);
+    selectedQuestionBloc.changeSelectedQuestion(question);  
+  }
+
+  void _goToQuestion(context) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PlayPage()
+      )
+    );
   }
 
 }

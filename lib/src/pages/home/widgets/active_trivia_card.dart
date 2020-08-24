@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:tecnonautas_app/core/models/trivia.dart';
 import 'package:tecnonautas_app/src/pages/home/widgets/trivia_info_dialog.dart';
+import 'package:tecnonautas_app/src/resources/app_colors.dart';
 import 'package:tecnonautas_app/src/widgets/circle_container.dart';
 import 'package:tecnonautas_app/src/widgets/subtitie.dart';
 
 class ActiveTriviaCard extends StatelessWidget {
   
-  
+  final Trivia mTrivia;
+
+  ActiveTriviaCard({@required this.mTrivia});
 
   @override
   Widget build(BuildContext context) {
@@ -22,20 +28,25 @@ class ActiveTriviaCard extends StatelessWidget {
               children: <Widget> [
                 Row(
                   children: <Widget> [
-                    Text(
-                      'Fórmulas Químicas', 
-                      style: Theme.of(context).textTheme.subtitle.merge(
-                        TextStyle(color: Theme.of(context).accentColor)
-                      )
+                    Expanded(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Text(
+                          mTrivia.name, 
+                          style: Theme.of(context).textTheme.subtitle.merge(
+                            TextStyle(color: Theme.of(context).accentColor)
+                          ),
+                        ),
+                      ),
                     ),
-                    Expanded(child: SizedBox(height: 0)),
-                    Text('10', 
+                    Text(mTrivia.points.toString(), 
                       style: Theme.of(context).textTheme.subtitle.merge(
                         TextStyle(color: Theme.of(context).accentColor)
                       )
                     ),
                     SizedBox(width: 5),
-                    Icon(Icons.android, size: 18, color: Theme.of(context).accentColor)
+                    SvgPicture.asset('assets/icons/cup.svg', color: accent),
+                    // FaIcon(FontAwesomeIcons.trophy, size: 18, color: Theme.of(context).accentColor)
                   ]
                 ),
                 SizedBox(height: 10),
@@ -49,12 +60,13 @@ class ActiveTriviaCard extends StatelessWidget {
                           CircleContainer(
                             mSize: 55,
                             mColor: Theme.of(context).primaryColorLight,
-                            mChild: Text('4', style: Theme.of(context).textTheme.title),
+                            mChild: Text(mTrivia.questions.length.toString(), style: Theme.of(context).textTheme.title),
                           ),
                           SizedBox(width: 30),
                           Expanded(
                             child: Text(
-                              'Las fórmulas químicas son la representación de los elementos que forman un compuesto y la proporción en que se encuentran',
+                              // 'Las fórmulas químicas son la representación de los elementos que forman un compuesto y la proporción en que se encuentran',
+                              mTrivia.description,
                               maxLines: 100,
                             )
                           )
@@ -85,7 +97,7 @@ class ActiveTriviaCard extends StatelessWidget {
   void _showActiveTriviaDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (BuildContext context) => TriviaInfoDialog()
+      builder: (BuildContext context) => TriviaInfoDialog(mTrivia: mTrivia)
     );
   } 
 }

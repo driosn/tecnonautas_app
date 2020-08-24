@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tecnonautas_app/src/resources/app_colors.dart';
 
 enum StatusButtonType {
-  INCORRECT, CORRECT, READY, WAITING
+  INCORRECT, CORRECT, READY, WAITING, NOT_ANSWERED
 }
 
 class QuestionStatusButton extends StatelessWidget {
@@ -51,6 +51,17 @@ class QuestionStatusButton extends StatelessWidget {
     mButtonType = StatusButtonType.READY;
   }
 
+  QuestionStatusButton.notAnswered({
+   @required this.mQuestionNumber,
+   @required this.mOnPressed 
+  }) {
+    mPointsNumber = 0.0;
+    mTextColor = neutralColor;
+    mBorder = Border.all(color: neutralColor, width: 3);
+    mStatusLabel = 'Pregunta no respondida';
+    mButtonType = StatusButtonType.NOT_ANSWERED;
+  }
+
   QuestionStatusButton.waiting({
     @required this.mPointsNumber, 
     @required this.mQuestionNumber,
@@ -72,6 +83,7 @@ class QuestionStatusButton extends StatelessWidget {
       child: Stack(
         children: <Widget>[
           Container(
+            margin: EdgeInsets.only(bottom: 6),
             height: _buttonHeight,
             width: double.infinity,
             decoration: BoxDecoration(
@@ -106,6 +118,7 @@ class QuestionStatusButton extends StatelessWidget {
           Positioned(child: _pointsCard(), right: 0)
         ],
       ),
+      onTap: this.mOnPressed,
     );
   }
 
@@ -125,13 +138,17 @@ class QuestionStatusButton extends StatelessWidget {
     final double _radius = 10;
     final double _fontSize = 12;
 
-    final Color _pointTextColor = (mButtonType == StatusButtonType.INCORRECT || 
-                                  mButtonType == StatusButtonType.CORRECT)
+     Color _pointTextColor = (mButtonType == StatusButtonType.INCORRECT || 
+                                  mButtonType == StatusButtonType.CORRECT ||
+                                  mButtonType == StatusButtonType.NOT_ANSWERED)
                                   ? Colors.white
                                   : lightGreyColor;
 
-    final FontWeight _pointFontWeight = (mButtonType == StatusButtonType.INCORRECT || 
-                                        mButtonType == StatusButtonType.CORRECT)
+
+
+     FontWeight _pointFontWeight = (mButtonType == StatusButtonType.INCORRECT || 
+                                        mButtonType == StatusButtonType.CORRECT ||
+                                        mButtonType == StatusButtonType.NOT_ANSWERED)
                                         ? FontWeight.bold
                                         : FontWeight.normal;
 
@@ -152,7 +169,7 @@ class QuestionStatusButton extends StatelessWidget {
           topRight: Radius.circular(_radius),
           bottomRight: Radius.circular(_radius) 
         ),
-        color: mButtonType == StatusButtonType.INCORRECT || mButtonType == StatusButtonType.CORRECT
+        color: mButtonType == StatusButtonType.INCORRECT || mButtonType == StatusButtonType.CORRECT || mButtonType == StatusButtonType.NOT_ANSWERED
               ? mTextColor
               : Colors.white
       ),

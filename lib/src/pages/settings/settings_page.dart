@@ -1,29 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:tecnonautas_app/src/pages/auth/auth_page.dart';
+import 'package:tecnonautas_app/src/pages/edit_profile/edit_profile_page.dart';
+import 'package:tecnonautas_app/src/pages/home/trivias_page.dart';
 import 'package:tecnonautas_app/src/resources/app_colors.dart';
+import 'package:tecnonautas_app/src/utils/user_preferences.dart';
 import 'package:tecnonautas_app/src/widgets/custom_plain_appbar.dart';
 
 class SettingsItem {
 
   final IconData itemIcon;  
   final String title;
+  final Function mOnPressed;
 
   SettingsItem(
     this.itemIcon,
     this.title,
+    this.mOnPressed
   );
 }
 
 class SettingsPage extends StatelessWidget {
   
-  final List<SettingsItem> _items = [
-    SettingsItem(FontAwesomeIcons.edit, 'Editar mi información'),
-    SettingsItem(FontAwesomeIcons.lock, 'Cambiar contraseña'),
-    SettingsItem(FontAwesomeIcons.questionCircle, 'Preguntas Frecuentes'),
-    SettingsItem(FontAwesomeIcons.mailBulk, 'Contáctanos'),
-    SettingsItem(FontAwesomeIcons.plus, '¿Quiénes somos?'),
-    SettingsItem(FontAwesomeIcons.windowClose, 'Salir'),
-  ];
+ 
   
   final double _settingsPadding = 14;
 
@@ -35,15 +34,41 @@ class SettingsPage extends StatelessWidget {
       body: Padding(
         padding: EdgeInsets.all(_settingsPadding),
         child: ListView.builder(
-          itemCount: _items.length,
+          itemCount: _items(context).length,
           itemBuilder: (BuildContext context, int index) {
 
-            return _settingsListTile(context, _items[index]);
+            return _settingsListTile(context, _items(context)[index]);
 
           },
         ),
       ),
     );
+  }
+
+  List<SettingsItem> _items(context) {
+    List<SettingsItem> items = [
+      SettingsItem(FontAwesomeIcons.edit, 'Editar mi información', () {
+        Navigator.push(context, MaterialPageRoute(builder: (context) => EditProfilePage()));
+      }),
+
+      SettingsItem(FontAwesomeIcons.lock, 'Cambiar contraseña', () {}),
+
+      SettingsItem(FontAwesomeIcons.questionCircle, 'Preguntas Frecuentes', () {}),
+
+      SettingsItem(FontAwesomeIcons.mailBulk, 'Contáctanos', () {}),
+
+      SettingsItem(FontAwesomeIcons.plus, '¿Quiénes somos?', () {}),
+
+      SettingsItem(FontAwesomeIcons.windowClose, 'Salir', () {
+        UserPreferences prefs = UserPreferences();
+        prefs.deleteUser();
+
+        Navigator.pushAndRemoveUntil(
+          context, MaterialPageRoute(builder: (_) => AuthPage()), (route) => false);
+      }),
+    ];
+
+    return items;
   }
 
   Widget _settingsListTile(BuildContext context, SettingsItem mItem) {
@@ -59,7 +84,7 @@ class SettingsPage extends StatelessWidget {
         mItem.title,
         style: TextStyle(color: titleTileColor),
       ),
-      onTap: () => _goToSelectedPage(context, SettingsPage()),
+      onTap: mItem.mOnPressed,
     );
   }
 

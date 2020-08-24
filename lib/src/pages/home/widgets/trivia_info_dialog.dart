@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:tecnonautas_app/core/bloc/select_active_trivia/selected_trivia_bloc.dart';
+import 'package:tecnonautas_app/core/bloc/user_trivia_ranking/user_trivia_ranking_bloc.dart';
+import 'package:tecnonautas_app/core/models/trivia.dart';
+import 'package:tecnonautas_app/src/pages/trivia_status/trivia_status_page.dart';
 import 'package:tecnonautas_app/src/resources/app_colors.dart';
+import 'package:tecnonautas_app/src/utils/show_loading.dart';
 import 'package:tecnonautas_app/src/widgets/gradient_button.dart';
 import 'package:tecnonautas_app/src/widgets/info_card.dart';
 import 'package:tecnonautas_app/src/widgets/tecnonautas_button.dart';
 
 class TriviaInfoDialog extends StatelessWidget {
+  
+  final Trivia mTrivia;
+  
+  TriviaInfoDialog({@required this.mTrivia});
+
   @override
   Widget build(BuildContext context) {
 
@@ -24,8 +35,8 @@ class TriviaInfoDialog extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              _InfoHeader(triviaName: 'Formulas Químicas', isFavorite: false),
-              _InfoContent()
+              _InfoHeader(triviaName: mTrivia.name, isFavorite: false),
+              _InfoContent(mTrivia: mTrivia)
             ],
           ),
         ),
@@ -93,9 +104,12 @@ class _InfoHeader extends StatelessWidget {
 
 class _InfoContent extends StatelessWidget {
   
+  final Trivia mTrivia;
+
+  _InfoContent({@required this.mTrivia});
+  
   double _contentPadding = 12;
   double _borderRadius = 15;
-  String _mTriviaDescription = 'Las fórmulas químicas son la representación de los elementos que forman un compuesto y la proporción en que se encuentran';
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +124,7 @@ class _InfoContent extends StatelessWidget {
       color: Theme.of(context).scaffoldBackgroundColor,
       child: Column(
         children: <Widget>[
-          _triviaDescription(_mTriviaDescription),
+          _triviaDescription(mTrivia.description),
           SizedBox(height: _contentPadding),
           _triviaCardsInfo(context),
           _actionButtons(context)
@@ -147,8 +161,8 @@ class _InfoContent extends StatelessWidget {
           child: InfoCard(
             mHeight: cardHeight, 
             mTitle: 'Responde', 
-            mIcon: Icon(Icons.ac_unit, color: accent), 
-            mChild: _cardContent(context, '4', 'Preguntas \n(lo antes posible)')
+            mIcon: SvgPicture.asset('assets/icons/question.svg'), 
+            mChild: _cardContent(context, mTrivia.questions.length.toString(), 'Preguntas \n(lo antes posible)')
           ),
         ),
         SizedBox(width: _contentPadding),
@@ -156,8 +170,8 @@ class _InfoContent extends StatelessWidget {
           child: InfoCard(
             mHeight: cardHeight, 
             mTitle: 'Gana', 
-            mIcon: Icon(Icons.ac_unit, color: accent), 
-            mChild: _cardContent(context, '10', 'Puntos')
+            mIcon: SvgPicture.asset('assets/icons/cup.svg'), 
+            mChild: _cardContent(context, mTrivia.points.toString(), 'Puntos')
           ),
         )
       ],
@@ -216,7 +230,31 @@ class _InfoContent extends StatelessWidget {
               accent,
               primary
             ], 
-            mOnPressed: () { Navigator.pushNamed(context, 'play'); }
+            mOnPressed: () async {
+              try {
+                UserTriviaRankingBloc userTriviaRankingBloc = UserTriviaRankingBloc();
+                SelectedActiveTriviaBloc selectedActiveTriviaBloc = SelectedActiveTriviaBloc();
+                selectedActiveTriviaBloc.changeSelectedActiveTrivia(mTrivia);
+
+                showLoading(context);
+                await selectedActiveTriviaBloc.playActiveTrivia();
+                await userTriviaRankingBloc.createNewUserTriviaRanking(mTrivia.id);
+
+                Navigator.pop(context);
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => TriviaStatusPage(
+                      mTrivia: mTrivia,
+                    )
+                  )
+                );
+              } catch (error) {
+                Navigator.pop(context);
+              }
+            },
+            // mOnPressed: () { Navigator.pushNamed(context, 'play'); }
           ),
           SizedBox(height: 24),
           TecnonautasButton(
@@ -225,7 +263,7 @@ class _InfoContent extends StatelessWidget {
             mRadius: btnRadius,
             mText: Text('Cerrar', style: TextStyle(color: Colors.black54, fontWeight: FontWeight.bold),), 
             mColor: Colors.white, 
-            mOnPressed: () {}
+            mOnPressed: () => Navigator.pop(context)
           )
         ],
       ),

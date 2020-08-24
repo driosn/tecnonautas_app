@@ -1,11 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
-import 'package:tecnonautas_app/src/pages/portal_home/portal_home_page.dart';
 import 'package:tecnonautas_app/src/providers/portal_home_model.dart';
 import 'package:tecnonautas_app/src/providers/push_notifications_provider.dart';
 import 'package:tecnonautas_app/src/router/router.dart';
+import 'package:tecnonautas_app/src/utils/user_preferences.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
  
-void main() => runApp(MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = new UserPreferences();
+  await prefs.initPreferences();
+
+  
+  runApp(MyApp());
+}
  
 class MyApp extends StatefulWidget {
   @override
@@ -35,6 +44,13 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (context) => PortalHomeModel())
       ],
       child: MaterialApp(
+        localizationsDelegates: [
+          GlobalMaterialLocalizations.delegate
+        ],
+        supportedLocales: [
+          const Locale('en', 'US'),
+          const Locale('es', 'ES')
+        ],
         debugShowCheckedModeBanner: false,
         title: 'Material App',
         theme: ThemeData(

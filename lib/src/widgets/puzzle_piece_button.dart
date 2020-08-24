@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:tecnonautas_app/core/bloc/question/selected_question_bloc.dart';
+import 'package:tecnonautas_app/src/resources/app_colors.dart';
 
 enum PiecePlace {
   TOP_LEFT,
@@ -13,12 +15,17 @@ class PuzzlePieceButton extends StatelessWidget {
   final double mWidth;
   final Color mColor;
   final PiecePlace piecePlace;
+  final String mText;
+  final bool mDrawBorder;
+
 
   PuzzlePieceButton({
     this.mHeight,
     this.mWidth,
     @required this.mColor,
-    @required this.piecePlace
+    @required this.piecePlace,
+    @required this.mText,
+    @required this.mDrawBorder
   });
   
   @override
@@ -29,7 +36,7 @@ class PuzzlePieceButton extends StatelessWidget {
           height: mHeight,
           width: mWidth,
           child: CustomPaint(
-            painter: _PuzzlePiecePainter(piecePlace, mColor)
+            painter: _PuzzlePiecePainter(piecePlace, mColor, mText, mDrawBorder)
           ),
         ),
         Positioned.fill(
@@ -41,7 +48,7 @@ class PuzzlePieceButton extends StatelessWidget {
             child: Container(
               child: Align(
                 alignment: Alignment.center,
-                child: Text('Pieza 1', style: TextStyle(color: Colors.white))
+                child: Text(mText, style: TextStyle(color: Colors.white))
               ),
             ),
           ),
@@ -55,21 +62,37 @@ class _PuzzlePiecePainter extends CustomPainter {
   
   final Color mColor;
   final PiecePlace piecePlace;
+  final String mLabel;
+  final bool mDrawBorder;
 
-  _PuzzlePiecePainter(this.piecePlace, this.mColor);
+  _PuzzlePiecePainter(
+    this.piecePlace, 
+    this.mColor,
+    this.mLabel,
+    this.mDrawBorder
+  );
 
   @override
   void paint(Canvas canvas, Size size) {
 
-    final paint = new Paint()
+    Paint paint = new Paint()
     ..color = mColor
     ..style = PaintingStyle.fill
     ..strokeWidth = 5.0;
 
-    final path = _generatePuzzlePiece(piecePlace, size);
+    Path path = _generatePuzzlePiece(piecePlace, size);
       
     canvas.drawShadow(path, Colors.black38, 8, false);  
     canvas.drawPath(path, paint);
+
+    paint = new Paint();
+    paint.style = PaintingStyle.stroke;
+    paint.strokeWidth = 12;
+    paint.color = accent;
+
+    if (mDrawBorder) {
+      canvas.drawPath(path, paint);
+    }
   }
 
   Path _generatePuzzlePiece(PiecePlace piecePlace, Size size) {

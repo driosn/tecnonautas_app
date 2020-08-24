@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tecnonautas_app/src/pages/ranking/widgets/ranking_data_bar.dart';
 import 'package:tecnonautas_app/src/resources/image_sizes.dart';
+import 'package:tecnonautas_app/src/utils/user_preferences.dart';
 import 'package:tecnonautas_app/src/widgets/tecnonautas_circular_avatar.dart';
 
 export 'package:tecnonautas_app/src/pages/ranking/widgets/ranking_data_bar.dart';
@@ -10,9 +11,11 @@ class RankingDataOwn extends StatelessWidget {
   final List<RankingDataItem> mItems;
   double mWidth;
 
-RankingDataOwn({@required this.mItems, this.mWidth}) {
-  if(this.mWidth != null && this.mWidth < 300) this.mWidth = 300;
-}
+  RankingDataOwn({@required this.mItems, this.mWidth}) {
+    if(this.mWidth != null && this.mWidth < 300) this.mWidth = 300;
+  }
+
+  UserPreferences prefs = UserPreferences();
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +41,7 @@ RankingDataOwn({@required this.mItems, this.mWidth}) {
               ),
             ),
             TecnonautasCircularAvatar.medium(
-              mAvatarImage: AssetImage('assets/images/avatar.jpg')
+              mAvatarImage: AssetImage('assets/images/avatars/${prefs.avatar}.png')
             ),
           ],
         ),

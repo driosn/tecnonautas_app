@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:tecnonautas_app/src/pages/settings/settings_page.dart';
 import 'package:tecnonautas_app/src/resources/app_colors.dart';
 import 'package:tecnonautas_app/src/resources/image_sizes.dart';
+import 'package:tecnonautas_app/src/utils/user_preferences.dart';
 import 'package:tecnonautas_app/src/widgets/appbar/avatar_coins.dart';
 import 'package:tecnonautas_app/src/widgets/appbar/avatar_level_bar.dart';
 import 'package:tecnonautas_app/src/widgets/tecnonautas_circular_avatar.dart';
@@ -16,6 +18,8 @@ class AvatarStatus extends StatelessWidget {
     
     final Size size = MediaQuery.of(context).size;
     
+    UserPreferences prefs = UserPreferences();
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
@@ -45,8 +49,8 @@ class AvatarStatus extends StatelessWidget {
                         child: Row(
                           children: <Widget>[
                             AvatarCoins(),
-                            SizedBox(width: 10),
-                            AvatarLevelBar()
+                            SizedBox(width: 70),
+                            // AvatarLevelBar()
                           ],
                         ),
                         bottom: 5,
@@ -54,7 +58,19 @@ class AvatarStatus extends StatelessWidget {
                       ),
                       Positioned(
                         right: 0,
-                        child: TecnonautasCircularAvatar.small(mAvatarImage: AssetImage('assets/images/avatar.jpg'))
+                        child: GestureDetector(
+                          child: TecnonautasCircularAvatar.small(
+                            mAvatarImage: prefs.avatar != null
+                                          ? AssetImage('assets/images/avatars/${prefs.avatar}.png')
+                                          : AssetImage('assets/images/avatar.jpg')
+                          ),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => SettingsPage())
+                            );
+                          },
+                        )
                       ),
                     ],
                   ),

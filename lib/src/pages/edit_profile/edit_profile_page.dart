@@ -1,17 +1,55 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:tecnonautas_app/core/bloc/edit_profile/edit_profile_bloc.dart';
 import 'package:tecnonautas_app/src/pages/edit_profile/widgets/profile_info_label.dart';
+import 'package:tecnonautas_app/src/pages/portal_home/portal_home_page.dart';
 import 'package:tecnonautas_app/src/resources/app_colors.dart';
+import 'package:tecnonautas_app/src/utils/parse_birthday.dart';
+import 'package:tecnonautas_app/src/utils/show_loading.dart';
+import 'package:tecnonautas_app/src/utils/user_preferences.dart';
+import 'package:tecnonautas_app/src/widgets/avatar_image_selector_dialog.dart';
 import 'package:tecnonautas_app/src/widgets/custom_plain_appbar.dart';
 import 'package:tecnonautas_app/src/widgets/gradient_button.dart';
 import 'package:tecnonautas_app/src/widgets/tecnonautas_circular_avatar.dart';
 
-class EditProfilePage extends StatelessWidget {
+class EditProfilePage extends StatefulWidget {
+  
+  @override
+  _EditProfilePageState createState() => _EditProfilePageState();
+}
+
+class _EditProfilePageState extends State<EditProfilePage> {
   
   final double _pagePadding = 20;
   final double _buttonRadius = 12;
-
   final double _verticalSpacing = 20;
+
+  UserPreferences prefs = UserPreferences();
+  EditProfileBloc editProfileBloc = EditProfileBloc();
+
+  TextEditingController _nameController = TextEditingController();
+  TextEditingController _lastnameController = TextEditingController();
+  TextEditingController _birthdateController = TextEditingController();
+  TextEditingController _cityController = TextEditingController();
+  TextEditingController _phoneController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    editProfileBloc.changeAvatar(prefs.avatar);
+    editProfileBloc.changeName(prefs.name);
+    editProfileBloc.changeLastname(prefs.lastname);
+    editProfileBloc.changeBirthdate(prefs.birthdate);
+    editProfileBloc.changeCity(prefs.city);
+    editProfileBloc.changePhone(int.parse(prefs.phone));
+
+    _nameController.text = prefs.name;
+    _lastnameController.text = prefs.lastname;
+    _birthdateController.text = parseBirthday(DateTime.parse(prefs.birthdate));
+    _cityController.text = prefs.city;
+    _phoneController.text = prefs.phone;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +73,7 @@ class EditProfilePage extends StatelessWidget {
                   accent,
                   primary
                 ], 
-                mOnPressed: _saveChanges
+                mOnPressed: () => _saveChanges(context)
               )
             ],
           ),
@@ -66,36 +104,77 @@ class EditProfilePage extends StatelessWidget {
   Widget _profileData() {
     final double _verticalSpacing = 35;
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        SizedBox(width: double.infinity),
-        ProfileInfoLabel(
-          title: 'Nombres', 
-          content: Text('David Samuel')
-        ),
-        SizedBox(height: _verticalSpacing),
-        ProfileInfoLabel(
-          title: 'Apellidos', 
-          content: Text('Rios Nuñez')
-        ),
-        SizedBox(height: _verticalSpacing),
-        ProfileInfoLabel(
-          title: 'Fecha de Nacimiento', 
-          content: Text('03 de Febrero de 1999')
-        ),
-        SizedBox(height: _verticalSpacing),
-        ProfileInfoLabel(
-          title: 'Ciudad', 
-          content: Text('La Paz')
-        ),
-        SizedBox(height: _verticalSpacing),
-        ProfileInfoLabel(
-          title: 'Numero de Teléfono', 
-          content: Text('67305722')
-        ),
-      ],
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          SizedBox(width: double.infinity),
+          TextField(
+            controller: _nameController,
+            decoration: InputDecoration(
+              labelText: 'Nombre',
+              labelStyle: TextStyle(color: titleSettingColor, fontSize: 18, fontWeight: FontWeight.normal),
+              border: InputBorder.none
+            ),
+            style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.normal),
+            onChanged: editProfileBloc.changeName,
+          ),
+          TextField(
+            controller: _lastnameController,
+            decoration: InputDecoration(
+              labelText: 'Apellido',
+              labelStyle: TextStyle(color: titleSettingColor, fontSize: 18, fontWeight: FontWeight.normal),
+              border: InputBorder.none
+            ),
+            style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.normal),
+            onChanged: editProfileBloc.changeLastname,
+          ),
+          TextField(
+            controller: _birthdateController,
+            decoration: InputDecoration(
+              labelText: 'Fecha de Nacimiento',
+              labelStyle: TextStyle(color: titleSettingColor, fontSize: 18, fontWeight: FontWeight.normal),
+              border: InputBorder.none
+            ),
+            style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.normal),
+            onTap: () async {
+                final dateTime = await showDatePicker(
+                  context: context, 
+                  initialDate: DateTime.now(), 
+                  firstDate: DateTime(1920), 
+                  lastDate: DateTime.now()
+                );
+             
+                if (dateTime != null) {
+                  editProfileBloc.changeBirthdate(dateTime.toString());
+                  _birthdateController.text = parseBirthday(DateTime.parse(editProfileBloc.birthdate));
+                }
+              },
+            ),
+          TextField(
+            controller: _cityController,
+            decoration: InputDecoration(
+              labelText: 'Ciudad',
+              labelStyle: TextStyle(color: titleSettingColor, fontSize: 18, fontWeight: FontWeight.normal),
+              border: InputBorder.none
+            ),
+            style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.normal),
+            onChanged: editProfileBloc.changeCity,
+          ),
+          TextField(
+            controller: _phoneController,
+            decoration: InputDecoration(
+              labelText: 'Numero de Telefono',
+              labelStyle: TextStyle(color: titleSettingColor, fontSize: 18, fontWeight: FontWeight.normal),
+              border: InputBorder.none
+            ),
+            keyboardType: TextInputType.numberWithOptions(decimal: false, signed: false),
+            style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.normal),
+            onChanged: (newPhone) => editProfileBloc.changePhone(int.parse(newPhone)),
+          ),
+        ],
+      ),
     );
   }
 
@@ -104,11 +183,19 @@ class EditProfilePage extends StatelessWidget {
 
     return Stack(
       children: <Widget>[
-        Container(
-          width: _width,
-          child: TecnonautasCircularAvatar.large(
-            mAvatarImage: AssetImage('assets/images/avatar.jpg'),
-          ),
+        StreamBuilder(
+          initialData: prefs.avatar,
+          stream: editProfileBloc.avatarStream,
+          builder: (context, snapshot) {
+            String imageName = snapshot.data;
+            
+            return Container(
+              width: _width,
+              child: TecnonautasCircularAvatar.large(
+                mAvatarImage: AssetImage('assets/images/avatars/$imageName.png'),
+              ),
+            );
+          }
         ),
 
         Positioned(
@@ -134,17 +221,37 @@ class EditProfilePage extends StatelessWidget {
           ],
         ),
       ),
-      onTap: _editImage,
+      onTap: () {
+        showAvatarSelectorDialog(context);
+      },
     );
   }
 
-  // TODO: Edit Image Action
+  void showAvatarSelectorDialog(context) {
+    showDialog(
+      context: context,
+      builder: (context) => AvatarImageSelectorDialog.edit(
+        mEditProfileBloc: this.editProfileBloc
+      )
+    );
+  }
+
   void _editImage() {
 
   }
 
-  // TODO: Save Changes
-  void _saveChanges() {
+  void _saveChanges(context) async {
+    try {
+      showLoading(context);
+      final response = await editProfileBloc.updateProfile();
+      
+      if (response) {
+        Navigator.pop(context);
+        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => PortalHomePage()), (route) => false);
+      }
+    } catch (error) {
+      Navigator.pop(context);
+    }
 
   }
 }
