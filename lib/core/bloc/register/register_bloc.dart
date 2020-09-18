@@ -25,6 +25,7 @@ class RegisterBloc with Validators {
   BehaviorSubject<String> _gradeController = BehaviorSubject<String>();
   BehaviorSubject<String> _avatarController = BehaviorSubject<String>();
   BehaviorSubject<String> _cityController = BehaviorSubject<String>();  
+  BehaviorSubject<bool> _isLoadingController = BehaviorSubject<bool>();
 
   // Streams
   Stream<String> get nameStream => _nameController.stream.transform(validateEmptyString);
@@ -36,6 +37,7 @@ class RegisterBloc with Validators {
   Stream<String> get gradeStream => _gradeController.stream.transform(validateEmptyString);
   Stream<String> get avatarStream => _avatarController.stream;
   Stream<String> get cityStream => _cityController.stream.transform(validateEmptyString);
+  Stream<bool> get isLoadingStream => _isLoadingController.stream;
 
   // Inputs
   Function(String) get changeName => _nameController.sink.add;
@@ -47,6 +49,7 @@ class RegisterBloc with Validators {
   Function(String) get changeGrade => _gradeController.sink.add;
   Function(String) get changeAvatar => _avatarController.sink.add;
   Function(String) get changeCity => _cityController.sink.add;
+  Function(bool) get changeIsLoading => _isLoadingController.sink.add;
 
   // Value
   String get name => _nameController.value;
@@ -58,6 +61,7 @@ class RegisterBloc with Validators {
   String get grade => _gradeController.value;
   String get avatar => _avatarController.value;
   String get city => _cityController.value;
+  bool get isLoading => _isLoadingController.value;
 
   // Custom Streams
   Stream<bool> get correctFormDataStream => Rx.combineLatest9(
@@ -76,7 +80,7 @@ class RegisterBloc with Validators {
   Future<void> createNewUser() async {
     String uniqueId = _uuid.v1();
 
-    await Firestore.instance.collection("users").document(uniqueId).setData({
+    Firestore.instance.collection("users").document(uniqueId).setData({
       "id" : uniqueId,
       "name" : this.name,
       "password" : Password.hash(this.password, new PBKDF2()),

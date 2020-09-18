@@ -36,8 +36,6 @@ class AuthPage extends StatelessWidget {
                                                 : Register()
               ),
             ),
-
-            SizedBox(height: 30)
           ],
         ),
       ),

@@ -69,7 +69,9 @@ class Login extends StatelessWidget {
               _loginButton(context),
 
               SizedBox(height: 80),
-              changeToRegisterButton()    
+              changeToRegisterButton(),
+              SizedBox(height: 20)
+
             ],
           ),
         ),

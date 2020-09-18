@@ -2,16 +2,19 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:tecnonautas_app/core/bloc/question/question_timer_bloc.dart';
 import 'package:tecnonautas_app/src/resources/app_colors.dart';
 
 class QuestionTimer extends StatefulWidget {
   
   final int mSeconds;
   final Function mOnFinishedTimer;
+  final QuestionTimerBloc mQuestionTimerBloc;
 
   QuestionTimer({
     @required this.mSeconds, 
-    this.mOnFinishedTimer
+    this.mOnFinishedTimer,
+    @required this.mQuestionTimerBloc
   });
 
   @override
@@ -23,6 +26,11 @@ class _QuestionTimerState extends State<QuestionTimer> {
   Timer _timer;
   int _counterIndex;
   String counterLabel;
+
+  Timer _pointTimer;
+  int _counterPointsIndex;
+  String counterPointsLabel;
+
   
   @override
   void initState() {
@@ -30,9 +38,11 @@ class _QuestionTimerState extends State<QuestionTimer> {
     super.initState();
     
     _counterIndex = widget.mSeconds;
+    _counterPointsIndex = 0;
     counterLabel = _counterIndex.toString();
 
     startTimer();
+    startPointTimer();
   }  
   
   void startTimer() {
@@ -42,9 +52,11 @@ class _QuestionTimerState extends State<QuestionTimer> {
         oneSec,
         (Timer timer) => setState(
           () {
-            if (_counterIndex == 0) {
+            if (_counterIndex == 0 || widget.mQuestionTimerBloc.isCompleted == true) {
               counterLabel = "TERMINADO!";
               timer.cancel();
+              _timer.cancel();
+              _pointTimer.cancel();
               widget.mOnFinishedTimer();
             } else {
               _counterIndex = _counterIndex - 1;
@@ -52,6 +64,21 @@ class _QuestionTimerState extends State<QuestionTimer> {
             }
           },
         ),
+    );
+  }
+
+  void startPointTimer() {
+    const oneMillisec = const Duration(milliseconds: 1);
+    _pointTimer = new Timer.periodic(
+      oneMillisec,
+      (Timer timer) => setState(
+        () {
+          if (_counterIndex == 0 || widget.mQuestionTimerBloc.isCompleted == true) {
+            _counterPointsIndex = _counterPointsIndex + 1;
+            print(_counterPointsIndex);
+          }
+        }
+      )
     );
   }
 

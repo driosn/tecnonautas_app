@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:tecnonautas_app/core/bloc/question/question_timer_bloc.dart';
 import 'package:tecnonautas_app/src/resources/app_colors.dart';
 
 class CounterBar extends StatefulWidget {
   
   final Duration duration;
   final double barWidth;
+  final QuestionTimerBloc mQuestionTimerBloc;
 
-  CounterBar({@required this.duration, @required this.barWidth});
+  CounterBar({@required this.duration, @required this.barWidth, @required this.mQuestionTimerBloc});
 
   @override
   _CounterBarState createState() => _CounterBarState();
@@ -58,7 +60,7 @@ class _CounterBarState extends State<CounterBar> with SingleTickerProviderStateM
               
               return  ClipRRect(
                 child: Container(
-                  width: widget.barWidth * _animation.value,
+                  width: widget.mQuestionTimerBloc.isCompleted == true ? 0 : widget.barWidth * _animation.value,
                   height: _barHeight,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(

@@ -86,7 +86,7 @@ class TriviaStatusPage extends StatelessWidget {
                   UserAnswer userAnswer = searchTriviaNameData(userTriviaAnswers);
 
                   if (userAnswer.responses["${questions.last["name"]}"] != null && userAnswer.responses["${questions.last["name"]}"] != "") {
-                    return FinishedTriviaPage();
+                    return FinishedTriviaPage(mParentTrivia: mTrivia);
                   }
                   return triviaStatusPage;
                 }

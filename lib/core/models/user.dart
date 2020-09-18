@@ -36,5 +36,4 @@ class User {
     city : data["city"],
     isValidated: data["isValidated"]
   );
-
 }

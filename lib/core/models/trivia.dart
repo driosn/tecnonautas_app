@@ -17,8 +17,23 @@ class Trivia {
   final Map<String, String> respCorrect;
   final Map<String, Map<String, String>> responses;
 
+  DocumentReference reference;
 
-  final DocumentReference reference;
+  Trivia({
+    this.id,
+    this.name,
+    this.category,
+    this.description,
+    this.points,
+    this.qtyPreg,
+    this.fav,
+    this.isActive,
+    this.qtyResp,
+    this.questionTime,
+    this.questions,
+    this.respCorrect,
+    this.responses
+  });
 
   Trivia.fromMap(Map<String, dynamic> map, {this.reference})
      : assert(map['id'] != null),

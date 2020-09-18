@@ -59,6 +59,7 @@ class _SearchInput extends StatelessWidget {
         ),
       ),
       child: TextField(
+        style: TextStyle(color: Colors.grey),
         decoration: InputDecoration(
           hintText: mHint,
           border: InputBorder.none

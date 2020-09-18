@@ -4,6 +4,7 @@ import 'package:tecnonautas_app/core/bloc/active_trivia/active_trivia_bloc.dart'
 import 'package:tecnonautas_app/core/bloc/select_active_trivia/selected_trivia_bloc.dart';
 import 'package:tecnonautas_app/core/bloc/selected_answer/selected_answer_bloc.dart';
 import 'package:tecnonautas_app/core/bloc/user_ranking/user_ranking_bloc.dart';
+import 'package:tecnonautas_app/core/models/trivia.dart';
 import 'package:tecnonautas_app/core/models/user_answer.dart';
 import 'package:tecnonautas_app/core/models/user_trivia_answers.dart';
 import 'package:tecnonautas_app/src/pages/finished_trivia/widgets/avatar_trivia_info.dart';
@@ -19,19 +20,32 @@ import 'package:tecnonautas_app/src/widgets/rounded_button.dart';
 import 'package:tecnonautas_app/src/widgets/trivias_status_card.dart';
 import 'package:tecnonautas_app/src/pages/trivia_status/widgets/question_status_button.dart';
 
-class FinishedTriviaPage extends StatelessWidget {
+class FinishedTriviaPage extends StatefulWidget {
+  
+  Trivia mParentTrivia;
+
+  FinishedTriviaPage({@required this.mParentTrivia});
+
+  @override
+  _FinishedTriviaPageState createState() => _FinishedTriviaPageState();
+}
+
+class _FinishedTriviaPageState extends State<FinishedTriviaPage> {
   
   final double _pagePadding = 10;
   final double _spacingValue = 10;
-
   final int _secondsValue = 30;
-
   final double _buttonRadius = 8;
   final double _buttonWidth = 200;
-
   final double _appbarPadding = 10;
 
   SelectedActiveTriviaBloc selectedActiveTriviaBloc = SelectedActiveTriviaBloc();
+
+  @override
+  void initState() {
+    super.initState();
+    selectedAnswerBloc.changeParentTrivia(widget.mParentTrivia);
+  }
 
   @override
   Widget build(BuildContext context) {

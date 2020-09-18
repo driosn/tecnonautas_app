@@ -33,11 +33,13 @@ class TimerContainer extends StatelessWidget {
           QuestionTimer(
             mSeconds: mSecondsDuration,
             mOnFinishedTimer: _finishTimer,
+            mQuestionTimerBloc: mTimerBloc
           ),
           SizedBox(height: 10),
           CounterBar(
             duration: Duration(seconds: mSecondsDuration), 
-            barWidth: size.width
+            barWidth: size.width,
+            mQuestionTimerBloc: mTimerBloc
           )
         ],
       ),

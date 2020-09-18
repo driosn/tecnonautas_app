@@ -2,10 +2,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tecnonautas_app/core/bloc/active_trivia/active_trivia_bloc.dart';
+import 'package:tecnonautas_app/core/bloc/search_trivia/search_trivia_bloc.dart';
+import 'package:tecnonautas_app/core/models/db_local_trivia.dart';
 import 'package:tecnonautas_app/core/models/trivia.dart';
 import 'package:tecnonautas_app/src/pages/home/widgets/active_trivia_card.dart';
 import 'package:tecnonautas_app/src/pages/home/widgets/trivia_card_item.dart';
 import 'package:tecnonautas_app/src/providers/portal_home_model.dart';
+import 'package:tecnonautas_app/src/resources/app_colors.dart';
+import 'package:tecnonautas_app/src/utils/db_provider.dart';
 import 'package:tecnonautas_app/src/widgets/appbar/tecnonautas_appbar.dart';
 import 'package:tecnonautas_app/src/widgets/circle_icon_button.dart';
 import 'package:tecnonautas_app/src/widgets/custom_search_input.dart';
@@ -19,24 +23,7 @@ class TriviasPage extends StatefulWidget {
 }
 
 class _TriviasPageState extends State<TriviasPage> {
-  final List<TriviaItem> mathTriviaItemList =  [
-    new TriviaItem(triviaTitle: 'Paralelo y perpendicular', isCompleted: true, isFavorite: true, questionsNumber: 7),
-    new TriviaItem(triviaTitle: 'Secuencias', isCompleted: false, isFavorite: false, questionsNumber: 5),
-    new TriviaItem(triviaTitle: 'Raices y potencias', isCompleted: true, isFavorite: true, questionsNumber: 3),
-    new TriviaItem(triviaTitle: 'Paralelo y perpendicular', isCompleted: false, isFavorite: true, questionsNumber: 7),
-    new TriviaItem(triviaTitle: 'Secuencias', isCompleted: false, isFavorite: true, questionsNumber: 5),
-    new TriviaItem(triviaTitle: 'Raices y potencias', isCompleted: true, isFavorite: false, questionsNumber: 3),
-  ];
-
-  final List<TriviaItem> natTriviaItemList =  [
-    new TriviaItem(triviaTitle: 'Las Plantas', isCompleted: false, isFavorite: true, questionsNumber: 7),
-    new TriviaItem(triviaTitle: 'El cuerpo Humano', isCompleted: true, isFavorite: false, questionsNumber: 5),
-    new TriviaItem(triviaTitle: 'Animales Mamíferos', isCompleted: false, isFavorite: true, questionsNumber: 3),
-    new TriviaItem(triviaTitle: 'Las Plantas', isCompleted: true, isFavorite: false, questionsNumber: 7),
-    new TriviaItem(triviaTitle: 'El cuerpo Humano', isCompleted: false, isFavorite: true, questionsNumber: 5),
-    new TriviaItem(triviaTitle: 'Animales Mamíferos', isCompleted: true, isFavorite: false, questionsNumber: 3),
-  ];
-
+  
   @override
   void initState() {
 
@@ -46,16 +33,12 @@ class _TriviasPageState extends State<TriviasPage> {
     });
 
     super.initState();
-
+    searchTriviaBloc.changeFilterType(FilterType.NONE);
   }
 
   @override
   void dispose() {
     super.dispose();
-  
-    // final portalHomeModel = Provider.of<PortalHomeModel>(context, listen: false);
-    // portalHomeModel.isTriviasPage = false;
-
   }
 
   @override
@@ -74,15 +57,150 @@ class _TriviasPageState extends State<TriviasPage> {
                   children: <Widget>[
                     _ActiveTrivia(),
                     _SearchTriviaSection(),
-                    _TriviaListSection(
-                      mIcon: Icons.add,
-                      mCategoryName: 'Matematicas',
-                      mTriviaItemList: mathTriviaItemList,
-                    ),
-                    _TriviaListSection(
-                      mIcon: Icons.library_books,
-                      mCategoryName: 'Ciencias Naturales',
-                      mTriviaItemList: natTriviaItemList,
+                    
+                    StreamBuilder<FilterType> (
+                      initialData: FilterType.NONE,
+                      stream: searchTriviaBloc.filterTypeStream,
+                      builder: (context, snapshot) {
+                        FilterType mFilterType = snapshot.data;
+
+                        return StreamBuilder(
+                          stream: searchTriviaBloc.searchTriviaStream,
+                          initialData: "",
+                          builder: (context, snapshot) {
+                            String searchResult = snapshot.data;
+      
+                            if (searchResult.isEmpty) {
+                              return FutureBuilder(
+                                future: DBProvider.db.readLocalTrivias(),
+                                builder: (context, snapshot) {
+                                  if (snapshot.hasData) {
+                                    List<DBLocalTrivia> triviasResult = snapshot.data;
+                                    List<String> categoryList = List<String>();
+            
+                                    if (mFilterType == FilterType.PLAYED) {
+                                      triviasResult.removeWhere((element) => element.played == false);
+                                    }
+                                    if (mFilterType == FilterType.FAVORITE) {
+                                      triviasResult.removeWhere((element) => element.favorite == false);
+                                    }
+      
+                                    triviasResult.forEach((element) {
+                                      if (!categoryList.contains(element.category)) categoryList.add(element.category);
+                                    });
+            
+                                    Map<String, List<DBLocalTrivia>> triviasByCategory = Map<String, List<DBLocalTrivia>>();
+                                    
+                                    categoryList.forEach((category) {
+                                      triviasByCategory.putIfAbsent(category, () => List<DBLocalTrivia>());
+                                      triviasResult.forEach((trivia) {
+                                        if (trivia.category == category) {
+                                          List<DBLocalTrivia> currentList = triviasByCategory[category];
+                                          currentList.add(trivia);
+                                          triviasByCategory[category] = currentList;
+                                        }
+                                      });
+                                    });
+                                    
+                                    List<Widget> triviaListSectionList = List<Widget>();
+                                    
+                                    triviasByCategory.forEach((key, value) {
+                                      triviaListSectionList.add(
+                                        _TriviaListSection(
+                                          mIcon: Icons.add,
+                                          mCategoryName: key,
+                                          mTriviaItemList: value.map(
+                                            (dbTrivia) => TriviaItem(
+                                              mTriviaId: dbTrivia.id, 
+                                              questionsNumber: dbTrivia.questionsQuantity, 
+                                              isCompleted: dbTrivia.played, 
+                                              isFavorite: dbTrivia.favorite, 
+                                              triviaTitle: dbTrivia.name
+                                            )).toList(),
+                                        )
+                                      );
+                                    });
+            
+                                    return Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: triviaListSectionList,
+                                    );
+                                  }
+            
+                                  return Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                },
+                              );
+                            } else {
+                              // Is not empty
+                              return FutureBuilder(
+                                future: DBProvider.db.readLocalTrivias(),
+                                builder: (context, snapshot) {
+                                  if (snapshot.hasData) {
+                                    List<DBLocalTrivia> triviasResult = snapshot.data;
+                                    triviasResult.removeWhere((element) => !(element.name.toUpperCase()).contains(searchResult.toUpperCase()));
+                                    List<String> categoryList = List<String>();
+            
+                                    if (mFilterType == FilterType.PLAYED) {
+                                      triviasResult.removeWhere((element) => element.played == false);
+                                    }
+                                    if (mFilterType == FilterType.FAVORITE) {
+                                      triviasResult.removeWhere((element) => element.favorite == false);
+                                    }
+
+                                    triviasResult.forEach((element) {
+                                      if (!categoryList.contains(element.category)) categoryList.add(element.category);
+                                    });
+            
+                                    Map<String, List<DBLocalTrivia>> triviasByCategory = Map<String, List<DBLocalTrivia>>();
+                                    
+                                    categoryList.forEach((category) {
+                                      triviasByCategory.putIfAbsent(category, () => List<DBLocalTrivia>());
+                                      triviasResult.forEach((trivia) {
+                                        if (trivia.category == category) {
+                                          List<DBLocalTrivia> currentList = triviasByCategory[category];
+                                          currentList.add(trivia);
+                                          triviasByCategory[category] = currentList;
+                                        }
+                                      });
+                                    });
+                                    
+                                    List<Widget> triviaListSectionList = List<Widget>();
+      
+                                    triviasByCategory.forEach((key, value) {
+                                      triviaListSectionList.add(
+                                        _TriviaListSection(
+                                          mIcon: Icons.add,
+                                          mCategoryName: key,
+                                          mTriviaItemList: value.map(
+                                            (dbTrivia) => TriviaItem(
+                                              mTriviaId: dbTrivia.id, 
+                                              questionsNumber: dbTrivia.questionsQuantity, 
+                                              isCompleted: dbTrivia.played, 
+                                              isFavorite: dbTrivia.favorite, 
+                                              triviaTitle: dbTrivia.name
+                                            )).toList(),
+                                        )
+                                      );
+                                    });
+            
+                                    return Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: triviaListSectionList,
+                                    );
+                                  }
+            
+                                  return Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                },
+                              ); 
+                            }
+                          },
+                        );
+
+                      },
                     )
                   ],
                 ),
@@ -119,11 +237,11 @@ class _TriviaListSection extends StatelessWidget {
             children: <Widget>[
               subtitleLabel(mIcon, mCategoryName),
               Spacer(),
-              RoundedButton(mHeight: 30, mWidth: 80, mText: Text('Ver Todo'), mRadius: 15)
+              // RoundedButton(mHeight: 30, mWidth: 80, mText: Text('Ver Todo'), mRadius: 15)
             ],
           ),
           Container(
-            height: 140,
+            height: 160,
             padding: EdgeInsets.symmetric(vertical: 8),
             child: ListView.separated(
               itemCount: mTriviaItemList.length,
@@ -149,13 +267,23 @@ class _TriviaListSection extends StatelessWidget {
 
 }
 
-class _SearchTriviaSection extends StatelessWidget {
+class _SearchTriviaSection extends StatefulWidget {
 
+  _SearchTriviaSection();
+
+  @override
+  __SearchTriviaSectionState createState() => __SearchTriviaSectionState();
+}
+
+class __SearchTriviaSectionState extends State<_SearchTriviaSection> {
+  
   @override
   Widget build(BuildContext context) {
 
     final size = MediaQuery.of(context).size;
     final sizedBoxWidth = (size.width / 2) - 8;
+
+    FilterType mFilterType = searchTriviaBloc.filterType;
 
     return TransparentContainer(
       mWidth: double.infinity,
@@ -168,13 +296,44 @@ class _SearchTriviaSection extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
-                  CircleIconButton(mSize: 40, mIcon: Icons.check, mOnPressed: () {}),
+                  CircleIconButton(
+                    mSize: 40, 
+                    mIcon: Icons.check,
+                    mColor: mFilterType == FilterType.PLAYED ? accent : darkGrey,
+                    mOnPressed: () {
+                      setState(() {
+                        if (mFilterType == FilterType.PLAYED) {
+                          searchTriviaBloc.changeFilterType(FilterType.NONE);
+                        } else {
+                          searchTriviaBloc.changeFilterType(FilterType.PLAYED);
+                        }
+                      });
+                    }
+                  ),
                   SizedBox(width: 10),
-                  CircleIconButton(mSize: 40, mIcon: Icons.favorite, mOnPressed: () {}),
+                  CircleIconButton(
+                    mSize: 40, 
+                    mIcon: Icons.favorite,
+                    mColor: mFilterType == FilterType.FAVORITE ? accent : darkGrey,
+                    mOnPressed: () {
+                      print("Favorite");
+                      setState(() {
+                        if (mFilterType == FilterType.FAVORITE) {
+                          searchTriviaBloc.changeFilterType(FilterType.NONE);
+                        } else {
+                          searchTriviaBloc.changeFilterType(FilterType.FAVORITE);
+                        }
+                      });
+                    }
+                  ),
                 ],
               ),
               SizedBox(height: 15),
-              CustomSearchInput(mWidth: size.width - 24, mOnChanged: (value) {})
+              CustomSearchInput(
+                mWidth: size.width - 24, 
+                mOnChanged: (value) {
+                  searchTriviaBloc.changeSearchTrivia(value);
+              })
             ],
           ),
           Positioned.fill(

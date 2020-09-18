@@ -10,6 +10,7 @@ import 'package:tecnonautas_app/core/models/question.dart';
 import 'package:tecnonautas_app/src/pages/questions/widgets/question_card.dart';
 import 'package:tecnonautas_app/src/pages/questions/widgets/timer_container.dart';
 import 'package:tecnonautas_app/src/pages/trivia_status/trivia_status_page.dart';
+import 'package:tecnonautas_app/src/pages/trivia_status/trivia_status_page_local.dart';
 import 'package:tecnonautas_app/src/resources/app_colors.dart';
 import 'package:tecnonautas_app/src/utils/show_loading.dart';
 import 'package:tecnonautas_app/src/widgets/appbar/tecnonautas_appbar.dart';
@@ -19,12 +20,12 @@ import 'package:tecnonautas_app/src/widgets/question_timer.dart';
 import 'package:tecnonautas_app/src/widgets/result_card.dart';
 import 'package:tecnonautas_app/src/widgets/tecnonautas_button.dart';
 
-class QuestionPage extends StatefulWidget {
+class QuestionLocalPage extends StatefulWidget {
   @override
-  _QuestionPageState createState() => _QuestionPageState();
+  _QuestionLocalPageState createState() => _QuestionLocalPageState();
 }
 
-class _QuestionPageState extends State<QuestionPage> {
+class _QuestionLocalPageState extends State<QuestionLocalPage> {
   
   QuestionTimerBloc _questionTimerBloc = new QuestionTimerBloc();
   final double pieceHeight = 140;
@@ -58,11 +59,10 @@ class _QuestionPageState extends State<QuestionPage> {
 
   @override
   Widget build(BuildContext context) {
-    print("Question Page");
-    print("Question Page");
-    print("Question Page");
-    print("Question Page");
-    print("Question Page");
+    print("Question Local Page");
+    print("Question Local Page");
+    print("Question Local Page");
+    print("Question Local Page");
     return Scaffold(
       body: StreamBuilder<Question>(
         stream: selectedQuestionBloc.selectedQuestionStream,
@@ -113,15 +113,9 @@ class _QuestionPageState extends State<QuestionPage> {
           return _pieceButtons(context, mQuestion);
         } else {
 
-          if (selectedAnswerBloc.selectedAnswer == "") selectedAnswerBloc.changeSelectedAnswer("No respondido");
-          selectedAnswerBloc.updateSelectedAnswer(mCorrectAnswer: mQuestion.respCorrect);
+          if (selectedAnswerBloc.selectedAnswer == "") selectedAnswerBloc.changeSelectedAnswer("Not Answered");
+          selectedAnswerBloc.updateSelectedAnswerLocal(mCorrectAnswer: mQuestion.respCorrect);
           
-          userTriviaRankingBloc.updateTriviaResult(
-            mTriviaId: selectedAnswerBloc.parentTrivia.id,
-            mCorrectAnswer: mQuestion.respCorrect,
-            mSelectedAnswer: selectedAnswerBloc.selectedAnswer
-          );
-
           return _questionResult(context, mQuestion);
         }
       },
@@ -208,7 +202,7 @@ class _QuestionPageState extends State<QuestionPage> {
 
   void _okAction(BuildContext context) {
     Navigator.pushReplacement(
-      context, MaterialPageRoute(builder: (_) => TriviaStatusPage(
+      context, MaterialPageRoute(builder: (_) => TriviaStatusPageLocal(
         mTrivia: selectedQuestionBloc.parentTrivia,
       )));
   }

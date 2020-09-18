@@ -84,6 +84,17 @@ class SelectedAnswerBloc {
     });
   }
 
+  void updateSelectedAnswerLocal({String mCorrectAnswer}) {
+    // double valuePerQuestion = (this.parentTrivia.points / this.parentTrivia.qtyPreg);
+    UserPreferences prefs = UserPreferences();
+    if (this.selectedAnswer == mCorrectAnswer) {
+      prefs.addQuestionAnswered(this.question, "Correct");
+      // prefs.updateQuestionResponse(this.parentTrivia, mQuestionIndex, mAnswer)
+    } else {
+      prefs.addQuestionAnswered(this.question, "Wrong");
+    }
+  }
+
   List<Map<String, dynamic>> rebuildList({
     UserTriviaAnswers mUserTriviaAnswers, 
     int mIndex,

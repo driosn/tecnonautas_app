@@ -21,6 +21,10 @@ class UserTriviaRankingBloc {
 
   Future<void> createNewUserTriviaRanking(String mTriviaId) async {
     DocumentSnapshot response = await Firestore.instance.collection("userTriviaRanking").document(mTriviaId).get();
+    if (!response.exists) {
+      await createTriviaRanking(mTriviaId);
+      response = await Firestore.instance.collection("userTriviaRanking").document(mTriviaId).get();
+    }
 
     List<Map<String, dynamic>> userRankingList = List<Map<String, dynamic>>();
 
@@ -31,19 +35,25 @@ class UserTriviaRankingBloc {
       userRankingList.add(Map<String, dynamic>.from(userRanking));
     });
 
-    if (!existsUserInTrivia) {
-      userRankingList.add({
-        "userId" : prefs.id,
-        "username" : prefs.username,
-        "points" : 0.0,
-        "correct" : 0,
-        "wrong" : 0,
-        "notAnswered" : 0
-      });
-      await response.reference.updateData({
-        "ranking" : userRankingList
-      });
-    }
+    // if (!existsUserInTrivia) {
+    //   userRankingList.add({
+    //     "userId" : prefs.id,
+    //     "username" : prefs.username,
+    //     "points" : 0.0,
+    //     "correct" : 0,
+    //     "wrong" : 0,
+    //     "notAnswered" : 0
+    //   });
+    //   await response.reference.updateData({
+    //     "ranking" : userRankingList
+    //   });
+    // }
+  }
+
+  Future<void> createTriviaRanking(String mTriviaId) async {
+    await Firestore.instance.collection("userTriviaRanking").document(mTriviaId).setData({
+      "ranking" : []
+    });
   }
 
   Future<void> addPointsToTriviaRanking({String mTriviaId, double mPoints}) async {

@@ -4,8 +4,10 @@ import 'package:tecnonautas_app/core/bloc/select_active_trivia/selected_trivia_b
 import 'package:tecnonautas_app/core/bloc/user_trivia_ranking/user_trivia_ranking_bloc.dart';
 import 'package:tecnonautas_app/core/models/trivia.dart';
 import 'package:tecnonautas_app/src/pages/trivia_status/trivia_status_page.dart';
+import 'package:tecnonautas_app/src/pages/trivia_status/trivia_status_page_local.dart';
 import 'package:tecnonautas_app/src/resources/app_colors.dart';
 import 'package:tecnonautas_app/src/utils/show_loading.dart';
+import 'package:tecnonautas_app/src/utils/user_preferences.dart';
 import 'package:tecnonautas_app/src/widgets/gradient_button.dart';
 import 'package:tecnonautas_app/src/widgets/info_card.dart';
 import 'package:tecnonautas_app/src/widgets/tecnonautas_button.dart';
@@ -13,9 +15,10 @@ import 'package:tecnonautas_app/src/widgets/tecnonautas_button.dart';
 class TriviaInfoDialog extends StatelessWidget {
   
   final Trivia mTrivia;
-  
-  TriviaInfoDialog({@required this.mTrivia});
+  final bool localTrivia;
 
+  TriviaInfoDialog({@required this.mTrivia, this.localTrivia = false});
+  
   @override
   Widget build(BuildContext context) {
 
@@ -36,7 +39,7 @@ class TriviaInfoDialog extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               _InfoHeader(triviaName: mTrivia.name, isFavorite: false),
-              _InfoContent(mTrivia: mTrivia)
+              _InfoContent(mTrivia: mTrivia, mLocalTrivia: localTrivia)
             ],
           ),
         ),
@@ -105,8 +108,11 @@ class _InfoHeader extends StatelessWidget {
 class _InfoContent extends StatelessWidget {
   
   final Trivia mTrivia;
+  final bool mLocalTrivia;
 
-  _InfoContent({@required this.mTrivia});
+  UserPreferences _prefs = UserPreferences();
+
+  _InfoContent({@required this.mTrivia, this.mLocalTrivia = false});
   
   double _contentPadding = 12;
   double _borderRadius = 15;
@@ -231,27 +237,33 @@ class _InfoContent extends StatelessWidget {
               primary
             ], 
             mOnPressed: () async {
-              try {
-                UserTriviaRankingBloc userTriviaRankingBloc = UserTriviaRankingBloc();
-                SelectedActiveTriviaBloc selectedActiveTriviaBloc = SelectedActiveTriviaBloc();
-                selectedActiveTriviaBloc.changeSelectedActiveTrivia(mTrivia);
+              if (mLocalTrivia) {
+                _prefs.addTriviaInfo(mTrivia);
+                _prefs.addTriviaScore(mTrivia);                
+                _playLocalTrivia(context);                
+              } else {
+                try {
+                  UserTriviaRankingBloc userTriviaRankingBloc = UserTriviaRankingBloc();
+                  SelectedActiveTriviaBloc selectedActiveTriviaBloc = SelectedActiveTriviaBloc();
+                  selectedActiveTriviaBloc.changeSelectedActiveTrivia(mTrivia);
 
-                showLoading(context);
-                await selectedActiveTriviaBloc.playActiveTrivia();
-                await userTriviaRankingBloc.createNewUserTriviaRanking(mTrivia.id);
+                  showLoading(context);
+                  await selectedActiveTriviaBloc.playActiveTrivia();
+                  await userTriviaRankingBloc.createNewUserTriviaRanking(mTrivia.id);
 
-                Navigator.pop(context);
+                  Navigator.pop(context);
 
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => TriviaStatusPage(
-                      mTrivia: mTrivia,
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => TriviaStatusPage(
+                        mTrivia: mTrivia,
+                      )
                     )
-                  )
-                );
-              } catch (error) {
-                Navigator.pop(context);
+                  );
+                } catch (error) {
+                  Navigator.pop(context);
+                }
               }
             },
             // mOnPressed: () { Navigator.pushNamed(context, 'play'); }
@@ -267,6 +279,18 @@ class _InfoContent extends StatelessWidget {
           )
         ],
       ),
+    );
+  }
+  
+  void _playLocalTrivia(context) {
+    print("Play Local Trivia");
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => TriviaStatusPageLocal(
+          mTrivia: mTrivia,
+        )
+      )
     );
   }
 }
