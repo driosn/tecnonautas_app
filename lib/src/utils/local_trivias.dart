@@ -386,7 +386,7 @@ List<Trivia> localTrivias = [
       "question3": 4,
     },
     questions: [
-      "¿Cuando la coma recorre a la derecha el exponente es?"
+      "¿Cuando la coma recorre a la derecha el exponente es?",
       "¿Cual es el resultado en numero de 12,345x10^2?",
       "¿Cuatas posiciones debe recorrer la coma si el exponente es 10^-2?",
       "¿El numero 0,0005 es, en notacion cientifica?",

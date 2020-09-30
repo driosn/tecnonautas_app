@@ -39,7 +39,7 @@ class Login extends StatelessWidget {
 
               TextField(
                 decoration: InputDecoration(
-                  labelStyle: TextStyle(color: Colors.white, fontFamily: 'Gibson'),
+                  labelStyle: TextStyle(color: Colors.white, fontFamily: 'Gibson', fontSize: 16),
                   labelText: 'Nombre de Usuario',
                   enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(
@@ -52,7 +52,7 @@ class Login extends StatelessWidget {
               ),
               TextField(
                 decoration: InputDecoration(
-                  labelStyle: TextStyle(color: Colors.white, fontFamily: 'Gibson'),
+                  labelStyle: TextStyle(color: Colors.white, fontFamily: 'Gibson', fontSize: 16),
                   labelText: 'Contraseña',
                   enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(

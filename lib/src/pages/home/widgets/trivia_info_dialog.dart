@@ -82,10 +82,13 @@ class _InfoHeader extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Text(
-                triviaName,
-                style: Theme.of(context).textTheme.headline6,
-              ),
+              Expanded(
+                child: Text(
+                  triviaName,
+                  style: Theme.of(context).textTheme.headline6,
+                  textAlign: TextAlign.center,
+                ),
+              )
             ],
           ),
           Row(

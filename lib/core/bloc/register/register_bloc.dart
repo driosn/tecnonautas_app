@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:password/password.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:tecnonautas_app/src/utils/utils.dart';
 import 'package:tecnonautas_app/src/utils/validators.dart';
 import 'package:uuid/uuid.dart';
 
@@ -14,6 +15,8 @@ class RegisterBloc with Validators {
   RegisterBloc._internal();
 
   Uuid _uuid = Uuid();
+
+  Utils _utils = Utils();
 
   // Controllers 
   BehaviorSubject<String> _nameController = BehaviorSubject<String>();
@@ -80,34 +83,36 @@ class RegisterBloc with Validators {
   Future<void> createNewUser() async {
     String uniqueId = _uuid.v1();
 
-    Firestore.instance.collection("users").document(uniqueId).setData({
-      "id" : uniqueId,
-      "name" : this.name,
-      "password" : Password.hash(this.password, new PBKDF2()),
-      "lastname" : this.lastname,
-      "username" : this.nickname,
-      "birthdate" : this.birthdate,
-      "phone" : this.phone,
-      "grade" : this.grade,
-      "avatar" : this.avatar,
-      "city" : this.city,
-      "isValidated" : false
-    });
-
-
-    // await Firestore.instance.collection("users").add({
-    //   "id" : _uuid.v1(),
-    //   "name" : this.name,
-    //   "password" : Password.hash(this.password, new PBKDF2()),
-    //   "lastname" : this.lastname,
-    //   "username" : this.nickname,
-    //   "birthdate" : this.birthdate,
-    //   "phone" : this.phone,
-    //   "grade" : this.grade,
-    //   "avatar" : this.avatar,
-    //   "city" : this.city,
-    //   "isValidated" : false
-    // });
+    if (_stringNotHasNumber(name) && _stringNotHasNumber(lastname)) {
+      if ((this.phone.length == 8 || this.phone.length == 7) && _utils.isNumeric(this.phone)) {
+        if (this.password.length >= 8) {
+          QuerySnapshot response = await Firestore.instance.collection("users").where("username", isEqualTo: this.nickname).getDocuments();
+          if (response.documents.length == 0) {
+            await Firestore.instance.collection("users").document(uniqueId).setData({
+              "id" : uniqueId,
+              "name" : this.name,
+              "password" : Password.hash(this.password, new PBKDF2()),
+              "lastname" : this.lastname,
+              "username" : this.nickname,
+              "birthdate" : this.birthdate,
+              "phone" : this.phone,
+              "grade" : this.grade,
+              "avatar" : this.avatar,
+              "city" : this.city,
+              "isValidated" : false
+            });
+          } else {
+            throw new Exception("Nombre de usuario ya existente, elige otro por favor");
+          }
+        } else {
+          throw new Exception("La contraseña debe contener mínimo 8 caracteres");
+        }
+      } else {
+        throw new Exception("El numero de celular debe ser correcto");
+      }
+    } else {
+      throw new Exception("El nombre y apellido no deben contener números");
+    }
   }
 
   void dispose() {
@@ -116,10 +121,18 @@ class RegisterBloc with Validators {
     _lastnameController?.close();
     _nicknameController?.close();
     _birthdateController?.close();
-    _phoneController?.close();
+    _phoneController?.close(); 
     _gradeController?.close();
     _avatarController?.close();
     _cityController?.close();
+  }
+
+  bool _stringNotHasNumber(String mValue) {
+    for(int i = 0; i < mValue.length; i++) {
+      int charCode = mValue.codeUnitAt(i);
+      if (charCode >= 48 && charCode <= 57) return false;
+    }
+    return true;
   }
 }
 

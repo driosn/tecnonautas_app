@@ -374,12 +374,19 @@ class _ActiveTrivia extends StatelessWidget {
                 builder: (context, snapshot) {
 
                   if (snapshot.hasData && snapshot.data.documents.length > 0) {
-                    Trivia mTrivia = Trivia.fromSnapshot(snapshot.data.documents.first);
-
-                    return ActiveTriviaCard(
-                      mTrivia: mTrivia,
+                    List<Widget> childrens = List<Widget>();
+                    snapshot.data.documents.forEach((element) {
+                      childrens.add(
+                        ActiveTriviaCard(mTrivia: Trivia.fromSnapshot(element))
+                      );
+                      childrens.add(SizedBox(height: 15));
+                    });
+                            
+                    return Container(
+                      child: Column(
+                        children: childrens
+                      ),
                     );
-
                   }
                   
                   return Text(

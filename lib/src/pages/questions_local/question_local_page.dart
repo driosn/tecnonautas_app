@@ -72,24 +72,28 @@ class _QuestionLocalPageState extends State<QuestionLocalPage> {
             Question currentQuestion = snapshot.data;
 
             return Container(
+              height: double.infinity,
+              width: double.infinity,
               padding: EdgeInsets.all(24),
               child: SafeArea(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: <Widget>[
-                    TecnonautasAppbar(),
-                    QuestionCard(mQuestionLbl: currentQuestion.questionLbl),
-                    SizedBox(height: _spacingSize),
-                    TimerContainer(
-                      mSecondsDuration: 10,
-                      mTimerBloc: _questionTimerBloc,
-                    ),
-                    SizedBox(height: _spacingSize * 2),
-                    _questionActions(
-                      mQuestion: currentQuestion
-                    ),
-                    Spacer()
-                  ],
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: <Widget>[
+                      TecnonautasAppbar(),
+                      QuestionCard(mQuestionLbl: currentQuestion.questionLbl),
+                      SizedBox(height: _spacingSize),
+                      TimerContainer(
+                        mSecondsDuration: 10,
+                        mTimerBloc: _questionTimerBloc,
+                      ),
+                      SizedBox(height: _spacingSize * 2),
+                      _questionActions(
+                        mQuestion: currentQuestion
+                      ),
+                      // Spacer()
+                    ],
+                  ),
                 ),
               ),
             );

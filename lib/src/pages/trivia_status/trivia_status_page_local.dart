@@ -60,33 +60,53 @@ class _TriviaStatusPageLocalState extends State<TriviaStatusPageLocal> {
   @override
   Widget build(BuildContext context) {
     final triviaStatusPage = Scaffold(
-      body: SingleChildScrollView(
-        physics: BouncingScrollPhysics(),
-        child: Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: _horizontalPadding, 
-            vertical: _verticalPadding
-          ),
-          child: Column(
-            children: <Widget>[
-              _CustomAppbar(),
-              SizedBox(height: _verticalSpacing),
-              TriviaStatusDescription(
-                mTitle: widget.mTrivia.name,
-                mDescription: widget.mTrivia.description,
-                mIsFavorite: false,
-              ),
-              SizedBox(height: _verticalSpacing),
-              _triviaInformation(context),
-              SizedBox(height: _verticalSpacing),
-              _questionsStatusList(context)
-            ],
+      body: WillPopScope(
+        onWillPop: () async {
+          return await showDialog(
+            context: context,
+            builder: (context) => LeaveTriviaDialog()
+          );
+        },
+        child: SingleChildScrollView(
+          physics: BouncingScrollPhysics(),
+          child: Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: _horizontalPadding, 
+              vertical: _verticalPadding
+            ),
+            child: Column(
+              children: <Widget>[
+                _CustomAppbar(),
+                SizedBox(height: _verticalSpacing),
+                TriviaStatusDescription(
+                  mTitle: widget.mTrivia.name,
+                  mDescription: widget.mTrivia.description,
+                  mIsFavorite: false,
+                ),
+                SizedBox(height: _verticalSpacing),
+                _triviaInformation(context),
+                SizedBox(height: _verticalSpacing),
+                _questionsStatusList(context)
+              ],
+            ),
           ),
         ),
       ),
     );
     
-    return triviaStatusPage;
+    int answeredQuestions = 0;
+
+    for(int i = 0; i < widget.mTrivia.questions.length; i++) {
+      String questionResult = prefs.getQuestionStatus(widget.mTrivia.questions[i]);
+      if (questionResult == "Correct" || questionResult == "Wrong") {
+        answeredQuestions = answeredQuestions + 1;
+      }
+    }
+
+
+    return answeredQuestions != widget.mTrivia.questions.length 
+            ? triviaStatusPage 
+            : FinishedTriviaPage(mParentTrivia: widget.mTrivia);
 
     // return StreamBuilder(
     //   stream: activeTriviaBloc.activeTriviaQuestionsStream,
@@ -197,7 +217,7 @@ class _TriviaStatusPageLocalState extends State<TriviaStatusPageLocal> {
 
           if (questionResult == "Wrong") {
             return QuestionStatusButton.incorrect(
-              mPointsNumber: double.parse((widget.mTrivia.points / widget.mTrivia.questions.length).toStringAsFixed(1)),
+              mPointsNumber: 0,
               mQuestionNumber: index + 1, 
               mOnPressed: () {}
             );

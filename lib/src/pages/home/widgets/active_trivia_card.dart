@@ -79,15 +79,15 @@ class ActiveTriviaCard extends StatelessWidget {
               ]
             )
           ),
-          Positioned(
-            bottom: 0,
-            right: 0,
-            child: IconButton(
-              onPressed: () {},
-              icon: Icon(Icons.add_circle_outline),
-              color: Colors.grey,
-            ),
-          )
+          // Positioned(
+            // bottom: 0,
+            // right: 0,
+            // child: IconButton(
+              // onPressed: () {},
+              // icon: Icon(Icons.add_circle_outline),
+              // color: Colors.grey,
+            // ),
+          // )
         ],
       ),
       onTap: () => _showActiveTriviaDialog(context),

@@ -34,27 +34,35 @@ class TriviaStatusPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final triviaStatusPage = Scaffold(
-      body: SingleChildScrollView(
-        physics: BouncingScrollPhysics(),
-        child: Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: _horizontalPadding, 
-            vertical: _verticalPadding
-          ),
-          child: Column(
-            children: <Widget>[
-              _CustomAppbar(),
-              SizedBox(height: _verticalSpacing),
-              TriviaStatusDescription(
-                mTitle: mTrivia.name,
-                mDescription: mTrivia.description,
-                mIsFavorite: false,
-              ),
-              SizedBox(height: _verticalSpacing),
-              _triviaInformation(context),
-              SizedBox(height: _verticalSpacing),
-              _questionsStatusList()
-            ],
+      body: WillPopScope(
+        onWillPop: () async {
+          return await showDialog(
+            context: context,
+            builder: (context) => LeaveTriviaDialog()
+          );
+        },
+        child: SingleChildScrollView(
+          physics: BouncingScrollPhysics(),
+          child: Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: _horizontalPadding, 
+              vertical: _verticalPadding
+            ),
+            child: Column(
+              children: <Widget>[
+                _CustomAppbar(),
+                SizedBox(height: _verticalSpacing),
+                TriviaStatusDescription(
+                  mTitle: mTrivia.name,
+                  mDescription: mTrivia.description,
+                  mIsFavorite: false,
+                ),
+                SizedBox(height: _verticalSpacing),
+                _triviaInformation(context),
+                SizedBox(height: _verticalSpacing),
+                _questionsStatusList()
+              ],
+            ),
           ),
         ),
       ),
@@ -179,20 +187,20 @@ class TriviaStatusPage extends StatelessWidget {
                           if (userAnswer.responses[auxMap["name"]] == null || userAnswer.responses[auxMap["name"]].length > 0) {
                             if (userAnswer.responses[auxMap["name"]] == mTrivia.respCorrect["question$index"]) {
                               return QuestionStatusButton.correct(
-                                  mPointsNumber: 2.5, 
-                                  mQuestionNumber: 1, 
+                                  mPointsNumber:  double.parse((mTrivia.points / mTrivia.questions.length).toStringAsFixed(1)), 
+                                  mQuestionNumber: index + 1, 
                                   mOnPressed: () {}
                                 );
                               }
                               return QuestionStatusButton.incorrect(
-                                mPointsNumber: 2.5, 
-                                mQuestionNumber: 1, 
+                                mPointsNumber: 0, 
+                                mQuestionNumber: index + 1, 
                                 mOnPressed: () {}
                               );
                           }
                           return QuestionStatusButton.ready(
-                            mPointsNumber: 2.5, 
-                            mQuestionNumber: 3, 
+                            mPointsNumber: mTrivia.points / mTrivia.questions.length, 
+                            mQuestionNumber: index + 1, 
                             mOnPressed: () {
                             SelectedAnswerBloc bloc = SelectedAnswerBloc()
                               ..changeUserAnswer(userAnswer)
@@ -208,7 +216,7 @@ class TriviaStatusPage extends StatelessWidget {
                         if (auxMap["wasPlayed"]) {
                           if (userAnswer.responses[auxMap["name"]] == mTrivia.respCorrect["question$index"]) {
                             return QuestionStatusButton.correct(
-                              mPointsNumber: 2.5, 
+                              mPointsNumber: double.parse((mTrivia.points / mTrivia.questions.length).toStringAsFixed(1)), 
                               mQuestionNumber: index + 1, 
                               mOnPressed: () {}
                             );
@@ -220,14 +228,14 @@ class TriviaStatusPage extends StatelessWidget {
                             );
                           }
                           return QuestionStatusButton.incorrect(
-                            mPointsNumber: 2.5, 
+                            mPointsNumber: 0, 
                             mQuestionNumber: index + 1, 
                             mOnPressed: () {}
                           );
                         } 
                         
                         return QuestionStatusButton.waiting(
-                          mPointsNumber: 2.5, 
+                          mPointsNumber: double.parse((mTrivia.points / mTrivia.questions.length).toStringAsFixed(1)), 
                           mQuestionNumber: index + 1, 
                           mOnPressed: () {}
                         );

@@ -28,6 +28,8 @@ class Register extends StatelessWidget {
 
   TextEditingController _birthdateController = TextEditingController();
 
+  final double mTextSize = 16;
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -52,7 +54,7 @@ class Register extends StatelessWidget {
                         labelStyle: TextStyle(color: Colors.white),
                         labelText: 'Nombre',
                       ),
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.normal),
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.normal, fontSize: mTextSize),
                       onChanged: registerBloc.changeName,
                     ),
                     TextField(
@@ -60,7 +62,7 @@ class Register extends StatelessWidget {
                         labelStyle: TextStyle(color: Colors.white),
                         labelText: 'Apellido'
                       ),
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.normal),
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.normal, fontSize: mTextSize),
                       onChanged: registerBloc.changeLastname
                     ),
                     TextField(
@@ -68,7 +70,7 @@ class Register extends StatelessWidget {
                         labelStyle: TextStyle(color: Colors.white),
                         labelText: 'Nombre de usuario'
                       ),
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.normal),
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.normal, fontSize: mTextSize),
                       onChanged: registerBloc.changeNickname
                     ),
                     TextField(
@@ -77,7 +79,7 @@ class Register extends StatelessWidget {
                         labelText: 'Contraseña',
                       ),
                       obscureText: true,
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.normal),
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.normal, fontSize: mTextSize),
                       onChanged: registerBloc.changePassword
                     ),
                     TextField(
@@ -86,12 +88,14 @@ class Register extends StatelessWidget {
                         labelStyle: TextStyle(color: Colors.white),
                         labelText: 'Fecha de Nacimiento'
                       ),
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.normal),
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.normal, fontSize: mTextSize),
                       onTap: () async {
                         final dateTime = await showDatePicker(
                           locale: Locale('es', 'ES'),
                           context: context, 
-                          initialDate: DateTime.now(), 
+                          initialDate: registerBloc.birthdate != null && registerBloc.birthdate != ""
+                                       ? DateTime.parse(registerBloc.birthdate)
+                                       : DateTime.now(), 
                           firstDate: DateTime(1920), 
                           lastDate: DateTime.now()
                         );
@@ -107,7 +111,7 @@ class Register extends StatelessWidget {
                         labelStyle: TextStyle(color: Colors.white),
                         labelText: 'Celular'
                       ),
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.normal),
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.normal, fontSize: mTextSize),
                       onChanged: registerBloc.changePhone,
                       keyboardType: TextInputType.numberWithOptions(signed: false, decimal: false),
                     ),
@@ -116,7 +120,7 @@ class Register extends StatelessWidget {
                         labelStyle: TextStyle(color: Colors.white),
                         labelText: 'Curso'
                       ),
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.normal),
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.normal, fontSize: mTextSize),
                       onChanged: registerBloc.changeGrade
                     ),
                     // TextField(
@@ -284,6 +288,26 @@ class Register extends StatelessWidget {
                               duration:  Duration(seconds: 4),
                               backgroundColor: accent,       
                             )..show(context);
+                          }).catchError((error) {
+                            registerBloc.changeIsLoading(false);
+                            showDialog(
+                              context: context,
+                              builder: (_) {
+                                return AlertDialog(
+                                  content: Text(
+                                    error.toString().substring(11), style: TextStyle(color: Colors.black, fontSize: 16)
+                                  ),
+                                  actions: [
+                                    FlatButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: Text("Ok"),
+                                    )
+                                  ],
+                                );
+                              }
+                            );
                           });
                         // });
 

@@ -64,7 +64,7 @@ class _FinishedTriviaPageState extends State<FinishedTriviaPage> {
                   padding: EdgeInsets.all(_pagePadding),
                   child: Column(
                     children: <Widget>[
-                      _TitleCard(title: 'Fórmulas Químicas'),
+                      _TitleCard(title: selectedAnswerBloc.parentTrivia.name),
                       SizedBox(height: _spacingValue),
                       AvatarTriviaInfo(
                         mTriviaId: selectedAnswerBloc.parentTrivia.id,
@@ -390,12 +390,14 @@ class _QuestionsStatus extends StatelessWidget {
                   DocumentSnapshot documentSnapshot = snapshot.data;
                   Map<String, dynamic> ownProfileData = Map<String, dynamic>();
 
-                  ownProfileData = documentSnapshot.data["ranking"].firstWhere((element) => element["userId"] == prefs.id);
-
-                  return TriviasStatusCard.neutral(
-                    mLabel: 'Sin respuesta', 
-                    mTriviasNumber: ownProfileData["notAnswered"]
-                  );
+                  if (documentSnapshot.data["ranking"].length > 0) {
+                    ownProfileData = documentSnapshot.data["ranking"].firstWhere((element) => element["userId"] == prefs.id);
+                    return TriviasStatusCard.neutral(
+                      mLabel: 'Sin respuesta', 
+                      mTriviasNumber: ownProfileData["notAnswered"]
+                    );
+                  }
+                  return Container();
                 }
                 return Container();
               },
