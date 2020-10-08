@@ -9,6 +9,7 @@ import 'package:tecnonautas_app/core/models/trivia.dart';
 import 'package:tecnonautas_app/core/models/user_answer.dart';
 import 'package:tecnonautas_app/core/models/user_trivia_answers.dart';
 import 'package:tecnonautas_app/src/pages/finished_trivia/finished_trivia_page.dart';
+import 'package:tecnonautas_app/src/pages/finished_trivia/finished_trivia_page_local.dart';
 import 'package:tecnonautas_app/src/pages/finished_trivia/widgets/leave_trivia_dialog.dart';
 import 'package:tecnonautas_app/src/pages/play/play_page.dart';
 import 'package:tecnonautas_app/src/pages/play_local/play_page_local.dart';
@@ -106,7 +107,7 @@ class _TriviaStatusPageLocalState extends State<TriviaStatusPageLocal> {
 
     return answeredQuestions != widget.mTrivia.questions.length 
             ? triviaStatusPage 
-            : FinishedTriviaPage(mParentTrivia: widget.mTrivia);
+            : FinishedTriviaPageLocal(mParentTrivia: widget.mTrivia);
 
     // return StreamBuilder(
     //   stream: activeTriviaBloc.activeTriviaQuestionsStream,

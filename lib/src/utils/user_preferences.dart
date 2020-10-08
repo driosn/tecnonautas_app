@@ -147,6 +147,12 @@ class UserPreferences {
     }
   }
 
+  // Returns Correct or Incorrect
+  String getQuestionResult(String mQuestionName) {
+    Map<String, dynamic> currentQuestionsAnswered = json.decode(questionsAnswered) ?? Map<String, String>();
+    return currentQuestionsAnswered[mQuestionName];
+  }
+
   void clearQuestionAnswered(String mQuestionName) {
     Map<String, String> currentQuestionsAnswered = json.decode(questionsAnswered) ?? Map<String, String>();
 

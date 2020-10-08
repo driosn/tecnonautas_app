@@ -35,19 +35,19 @@ class UserTriviaRankingBloc {
       userRankingList.add(Map<String, dynamic>.from(userRanking));
     });
 
-    // if (!existsUserInTrivia) {
-    //   userRankingList.add({
-    //     "userId" : prefs.id,
-    //     "username" : prefs.username,
-    //     "points" : 0.0,
-    //     "correct" : 0,
-    //     "wrong" : 0,
-    //     "notAnswered" : 0
-    //   });
-    //   await response.reference.updateData({
-    //     "ranking" : userRankingList
-    //   });
-    // }
+    if (!existsUserInTrivia) {
+      userRankingList.add({
+        "userId" : prefs.id,
+        "username" : prefs.username,
+        "points" : 0.0,
+        "correct" : 0,
+        "wrong" : 0,
+        "notAnswered" : 0
+      });
+      await response.reference.updateData({
+        "ranking" : userRankingList
+      });
+    }
   }
 
   Future<void> createTriviaRanking(String mTriviaId) async {

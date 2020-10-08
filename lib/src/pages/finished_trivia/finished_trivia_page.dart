@@ -371,11 +371,15 @@ class _QuestionsStatus extends StatelessWidget {
                   DocumentSnapshot documentSnapshot = snapshot.data;
                   Map<String, dynamic> ownProfileData = Map<String, dynamic>();
 
-                  ownProfileData = documentSnapshot.data["ranking"].firstWhere((element) => element["userId"] == prefs.id);
+                  if (documentSnapshot.data["ranking"].isNotEmpty) {
+                    ownProfileData = documentSnapshot.data["ranking"].firstWhere((element) => element["userId"] == prefs.id);
+                  }
 
                   return TriviasStatusCard.wrong(
                     mLabel: 'Incorrectas', 
-                    mTriviasNumber: ownProfileData["wrong"]
+                    mTriviasNumber: ownProfileData.isEmpty 
+                                    ? 0
+                                    : ownProfileData["wrong"]
                   );
                 }
                 return Container();
@@ -408,49 +412,3 @@ class _QuestionsStatus extends StatelessWidget {
     );
   }
 }
-
-class _QuestionStatusList extends StatelessWidget {
-
-  @override
-  Widget build(BuildContext context) {
-    return _questionsStatusList();
-  }
-
-  Widget _questionsStatusList() {
-    return Container(
-      child: Column(
-        children: <Widget>[
-          QuestionStatusButton.correct(
-            mPointsNumber: 0, 
-            mQuestionNumber: 1,
-            mOnPressed:_questionButtonAction,
-          ),
-          SizedBox(height: 10),
-          QuestionStatusButton.incorrect(
-            mPointsNumber: 2.5, 
-            mQuestionNumber: 2,
-            mOnPressed: _questionButtonAction,
-          ),
-          SizedBox(height: 10),
-          QuestionStatusButton.ready(
-            mPointsNumber: 2.5, 
-            mQuestionNumber: 3,
-          mOnPressed: _questionButtonAction,
-          ),
-          SizedBox(height: 10),
-          QuestionStatusButton.waiting(
-            mPointsNumber: 2.5, 
-            mQuestionNumber: 4,
-            mOnPressed: _questionButtonAction,
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _questionButtonAction() {
-
-  }
-
-}
-

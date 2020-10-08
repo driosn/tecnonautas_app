@@ -199,7 +199,7 @@ class TriviaStatusPage extends StatelessWidget {
                               );
                           }
                           return QuestionStatusButton.ready(
-                            mPointsNumber: mTrivia.points / mTrivia.questions.length, 
+                            mPointsNumber: double.parse((mTrivia.points / mTrivia.questions.length).toStringAsFixed(1)), 
                             mQuestionNumber: index + 1, 
                             mOnPressed: () {
                             SelectedAnswerBloc bloc = SelectedAnswerBloc()
