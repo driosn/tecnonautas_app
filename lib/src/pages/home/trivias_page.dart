@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tecnonautas_app/core/bloc/active_trivia/active_trivia_bloc.dart';
+import 'package:tecnonautas_app/core/bloc/local_trivias/local_trivias_bloc.dart';
 import 'package:tecnonautas_app/core/bloc/search_trivia/search_trivia_bloc.dart';
 import 'package:tecnonautas_app/core/models/db_local_trivia.dart';
 import 'package:tecnonautas_app/core/models/trivia.dart';
@@ -13,7 +14,6 @@ import 'package:tecnonautas_app/src/utils/db_provider.dart';
 import 'package:tecnonautas_app/src/widgets/appbar/tecnonautas_appbar.dart';
 import 'package:tecnonautas_app/src/widgets/circle_icon_button.dart';
 import 'package:tecnonautas_app/src/widgets/custom_search_input.dart';
-import 'package:tecnonautas_app/src/widgets/rounded_button.dart';
 import 'package:tecnonautas_app/src/widgets/transparent_container.dart';
 
 class TriviasPage extends StatefulWidget {
@@ -24,8 +24,13 @@ class TriviasPage extends StatefulWidget {
 
 class _TriviasPageState extends State<TriviasPage> {
   
+  LocalTriviasBloc localTriviasBloc;
+
   @override
   void initState() {
+
+    localTriviasBloc = LocalTriviasBloc();
+    localTriviasBloc.reloadTrivias();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final portalHomeModel = Provider.of<PortalHomeModel>(context, listen: false);
@@ -71,8 +76,8 @@ class _TriviasPageState extends State<TriviasPage> {
                             String searchResult = snapshot.data;
       
                             if (searchResult.isEmpty) {
-                              return FutureBuilder(
-                                future: DBProvider.db.readLocalTrivias(),
+                              return StreamBuilder(
+                                stream: localTriviasBloc.localTriviasStream,
                                 builder: (context, snapshot) {
                                   if (snapshot.hasData) {
                                     List<DBLocalTrivia> triviasResult = snapshot.data;

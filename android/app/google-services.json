@@ -8,18 +8,34 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:775816760424:android:b4a92511137056067b3fdd",
+        "mobilesdk_app_id": "1:775816760424:android:2b1b53bad61e0d697b3fdd",
         "android_client_info": {
-          "package_name": "com.example.tecnonautas_app"
+          "package_name": "com.tecnonautasbolivia.tecnonautas"
         }
       },
       "oauth_client": [
         {
-          "client_id": "775816760424-tu35ev6qo220brqgj8onu7fgie3jhm3r.apps.googleusercontent.com",
+          "client_id": "775816760424-6dd4tfdn95d6mbm5u19nsfhltrkch7pt.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.tecnonautas_app",
-            "certificate_hash": "08535594dcf73013e5c5fb5cc8bc7c7a9f7fc290"
+            "package_name": "com.tecnonautasbolivia.tecnonautas",
+            "certificate_hash": "b3c821ad0794860c126ff1979dc40826dd530e48"
+          }
+        },
+        {
+          "client_id": "775816760424-d02fb0umrmvb08lpk3i0plo941vl86d2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tecnonautasbolivia.tecnonautas",
+            "certificate_hash": "fa8260d0176972887871d591f075a7634db61f11"
+          }
+        },
+        {
+          "client_id": "775816760424-e74abr0h53h7a02jg3oubrqijpaiocig.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tecnonautasbolivia.tecnonautas",
+            "certificate_hash": "5942afe0aa75c94197a3a4b1c3f94a77a2d46713"
           }
         },
         {

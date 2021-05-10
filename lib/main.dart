@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:tecnonautas_app/src/pages/init/init_page.dart';
+import 'package:tecnonautas_app/src/pages/splash_screen/splash_screen_page.dart';
 import 'package:tecnonautas_app/src/providers/portal_home_model.dart';
 import 'package:tecnonautas_app/src/providers/push_notifications_provider.dart';
 import 'package:tecnonautas_app/src/router/router.dart';
@@ -31,9 +33,7 @@ class _MyAppState extends State<MyApp> {
     pushProvider.initNotifications();
 
     pushProvider.mensajesStream.listen((argumento) {
-      
       print('Argumento desde main: $argumento');
-
     });
   }
 
@@ -77,8 +77,8 @@ class _MyAppState extends State<MyApp> {
             ) 
           )
         ),
-        initialRoute: '/',
-        onGenerateRoute: Router.generateRoute,
+        // home: SplashScreenPage()
+        home: SplashScreenPage()
       ),
     );
   }

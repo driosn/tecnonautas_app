@@ -251,8 +251,8 @@ class _InfoContent extends StatelessWidget {
                   selectedActiveTriviaBloc.changeSelectedActiveTrivia(mTrivia);
 
                   showLoading(context);
-                  await selectedActiveTriviaBloc.playActiveTrivia();
-                  await userTriviaRankingBloc.createNewUserTriviaRanking(mTrivia.id);
+                  // await selectedActiveTriviaBloc.playActiveTrivia();
+                  // await userTriviaRankingBloc.createNewUserTriviaRanking(mTrivia.id);
 
                   Navigator.pop(context);
 

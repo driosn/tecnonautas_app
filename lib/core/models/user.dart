@@ -9,6 +9,7 @@ class User {
   String grade;
   String avatar;
   String city;
+  int score;
   bool isValidated;
 
   User({
@@ -21,6 +22,7 @@ class User {
     this.grade,
     this.avatar,
     this.city,
+    this.score,
     this.isValidated
   });
 
@@ -30,10 +32,11 @@ class User {
     lastname : data["lastname"],
     username : data["username"],
     birthdate : data["birthdate"],
-    phone : data["phone"],
+    phone : data["phone"].toString(),
     grade : data["grade"],
     avatar : data["avatar"],
     city : data["city"],
+    score: data["score"],
     isValidated: data["isValidated"]
   );
 }

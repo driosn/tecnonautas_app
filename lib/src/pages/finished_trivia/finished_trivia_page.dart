@@ -1,22 +1,22 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:tecnonautas_app/core/bloc/active_trivia/active_trivia_bloc.dart';
 import 'package:tecnonautas_app/core/bloc/select_active_trivia/selected_trivia_bloc.dart';
 import 'package:tecnonautas_app/core/bloc/selected_answer/selected_answer_bloc.dart';
-import 'package:tecnonautas_app/core/bloc/user_ranking/user_ranking_bloc.dart';
+import 'package:tecnonautas_app/core/bloc/user_summary/user_summary_bloc.dart';
+import 'package:tecnonautas_app/core/bloc/web_data/web_data_bloc.dart';
 import 'package:tecnonautas_app/core/models/trivia.dart';
 import 'package:tecnonautas_app/core/models/user_answer.dart';
+import 'package:tecnonautas_app/core/models/user_summary.dart';
 import 'package:tecnonautas_app/core/models/user_trivia_answers.dart';
+import 'package:tecnonautas_app/core/models/web_data.dart';
 import 'package:tecnonautas_app/src/pages/finished_trivia/widgets/avatar_trivia_info.dart';
-import 'package:tecnonautas_app/src/pages/finished_trivia/widgets/leave_trivia_dialog.dart';
 import 'package:tecnonautas_app/src/pages/finished_trivia/widgets/response_average_bar.dart';
+import 'package:tecnonautas_app/src/pages/portal_home/portal_home_page.dart';
 import 'package:tecnonautas_app/src/resources/app_colors.dart';
 import 'package:tecnonautas_app/src/utils/user_preferences.dart';
 import 'package:tecnonautas_app/src/widgets/appbar/tecnonautas_appbar.dart';
 import 'package:tecnonautas_app/src/widgets/card_container.dart';
 import 'package:tecnonautas_app/src/widgets/favorite_button.dart';
 import 'package:tecnonautas_app/src/widgets/gradient_button.dart';
-import 'package:tecnonautas_app/src/widgets/rounded_button.dart';
 import 'package:tecnonautas_app/src/widgets/trivias_status_card.dart';
 import 'package:tecnonautas_app/src/pages/trivia_status/widgets/question_status_button.dart';
 
@@ -66,12 +66,26 @@ class _FinishedTriviaPageState extends State<FinishedTriviaPage> {
                     children: <Widget>[
                       _TitleCard(title: selectedAnswerBloc.parentTrivia.name),
                       SizedBox(height: _spacingValue),
-                      AvatarTriviaInfo(
-                        mTriviaId: selectedAnswerBloc.parentTrivia.id,
-                        avatarRanking: 3,
-                        finalScore: 6,
-                        totalPlayers: 232,
-                      ),
+                      StreamBuilder(
+                        stream: userSummaryBloc.userSummaryStream,
+                        builder: (context, summarySnapshot) {
+                          if (summarySnapshot.hasData) {
+                            int correctCounter = 0;
+                            UserSummary auxSummary = UserSummary.fromDocumentList(summarySnapshot.data.documents);
+                            UserSummary ownUserSummary = auxSummary.getOwnUserSummary();
+
+                            correctCounter = _getContainNumber(selectedAnswerBloc.parentTrivia.questions, ownUserSummary.correctAnswers);
+
+                            return AvatarTriviaInfo(
+                              mTriviaId: selectedAnswerBloc.parentTrivia.id,
+                              avatarRanking: 1,
+                              finalScore: correctCounter * (selectedAnswerBloc.parentTrivia.points / (selectedAnswerBloc.parentTrivia.questions.length)),
+                              totalPlayers: 1,
+                            );
+                          }
+                          return Container();
+                        },
+                      ),                      
                       // SizedBox(height: _spacingValue),
                       // _AverageResponseInfo(mSecondValue: _secondsValue),
                       SizedBox(height: _spacingValue),
@@ -100,88 +114,84 @@ class _FinishedTriviaPageState extends State<FinishedTriviaPage> {
       )
     );
   }
+    
+  int _getContainNumber(List<String> question, List<String> mIterable) {
+    int counter = 0;
+    mIterable.forEach((item) {
+      if (question.contains(item)) {
+        counter += 1;
+      }
+    });
+    return counter;
+  }
 
-  Widget _questionsStatusList() {
+Widget _questionsStatusList() {
+    UserPreferences prefs = UserPreferences();
+    print(prefs.id);
+
+    List<String> triviaQuestions = widget.mParentTrivia.questions;
+
     return StreamBuilder(
-      stream: activeTriviaBloc.activeTriviaQuestionsStream,
-      builder: (context, snapshot) {
-      
-        if (snapshot.hasData) {
-          QuerySnapshot response = snapshot.data;
-          DocumentSnapshot document = response.documents.first;
+      stream: webDataBloc.webDataStream,
+      builder: (context, webSnapshot) {
+        if (webSnapshot.hasData) {
+          WebData webData = WebData.fromDocument(webSnapshot.data.documents.first);
 
-          final data = document.data;
-          List<dynamic> questions = data["questions"];
-          
-          return StreamBuilder<DocumentSnapshot>(
-            stream: activeTriviaBloc.userTriviaAnswersStream,
-            builder: (context, snapshot) {
-            
-              if (snapshot.hasData) {
-                UserTriviaAnswers userTriviaAnswers = UserTriviaAnswers.fromDocument(snapshot.data.data);                
-                UserAnswer userAnswer = searchTriviaNameData(userTriviaAnswers);
+          return StreamBuilder(
+            stream: userSummaryBloc.userSummaryStream,
+            builder: (context, summarySnapshot) {
+              if (summarySnapshot.hasData) {
+                UserSummary auxSummary = UserSummary.fromDocumentList(summarySnapshot.data.documents);
+                UserSummary ownUserSummary = auxSummary.getOwnUserSummary();
 
                 return SingleChildScrollView(
                   child: Column(
-                    children: List.generate(questions.length, (index) {
-                    
-                        Map<String, dynamic> auxMap = Map<String, dynamic>.from(questions[index]);
+                    children: List.generate(
+                      triviaQuestions.length, 
+                      (index) {
+                        final String question = triviaQuestions[index];
 
-                        if (auxMap["isActive"] == true) {
-                          if (userAnswer.responses[auxMap["name"]] != null || userAnswer.responses[auxMap["name"]].length > 0) {
-                            if (userAnswer.responses[auxMap["name"]] == selectedActiveTriviaBloc.selectedActiveTrivia.respCorrect["question$index"]) {
-                              return QuestionStatusButton.correct(
-                                mPointsNumber: 2.5, 
-                                mQuestionNumber: index + 1, 
-                                mOnPressed: () {}
-                              );
-                            }
-                            return QuestionStatusButton.incorrect(
-                              mPointsNumber: 2.5, 
-                              mQuestionNumber: 1, 
-                              mOnPressed: () {}
-                            );
-                          }
-                        }
+                        if (ownUserSummary.notAnsweredQuestions.contains(question)) {
+                          return QuestionStatusButton.notAnswered(
+                            mQuestionNumber: index + 1, 
+                            mOnPressed: () {}
+                          );
+                        }              
 
-                        if (auxMap["wasPlayed"]) {
-                          if (userAnswer.responses[auxMap["name"]] == selectedActiveTriviaBloc.selectedActiveTrivia.respCorrect["question$index"]) {
-                            return QuestionStatusButton.correct(
-                              mPointsNumber: 2.5, 
-                              mQuestionNumber: index + 1, 
-                              mOnPressed: () {}
-                            );
-                          }
-                          if (userAnswer.responses[auxMap["name"]] == "" || userAnswer.responses[auxMap["name"]] == "No respondido") {
-                            return QuestionStatusButton.notAnswered(
-                              mQuestionNumber: index + 1, 
-                              mOnPressed: () {}
-                            );
-                          }
-                          return QuestionStatusButton.incorrect(
-                            mPointsNumber: 2.5, 
+                        if (ownUserSummary.correctAnswers.contains(question)) {
+                          return QuestionStatusButton.correct(
+                            mPointsNumber:  double.parse((widget.mParentTrivia.points / widget.mParentTrivia.questions.length).toStringAsFixed(1)), 
                             mQuestionNumber: index + 1, 
                             mOnPressed: () {}
                           );
                         }
-                        return QuestionStatusButton.incorrect(
-                          mPointsNumber: 2.5, 
+
+                        if (ownUserSummary.wrongQuestions.contains(question)) {
+                          return QuestionStatusButton.incorrect(
+                            mPointsNumber: 0, 
+                            mQuestionNumber: index + 1, 
+                            mOnPressed: () {}
+                          );
+                        }
+
+                        return QuestionStatusButton.waiting(
+                          mPointsNumber: double.parse((widget.mParentTrivia.points / widget.mParentTrivia.questions.length).toStringAsFixed(1)), 
                           mQuestionNumber: index + 1, 
                           mOnPressed: () {}
-                        );                         
+                        );
                       }
-                    ),
+                    )
                   )
                 );
               }
               return Container();
-              
-            }
+            },
           );
+          // return StreamBuilder(
+            // stream: ,
+          // );
         }
-
         return Container();
-
       },
     );
   }
@@ -217,7 +227,7 @@ class _FinishedTriviaPageState extends State<FinishedTriviaPage> {
   }
 
   void _newTrivia(BuildContext context) {
-    Navigator.pushReplacementNamed(context, '/');
+    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => PortalHomePage()), (route) => false);
   }
 }
 
@@ -325,90 +335,78 @@ class _AverageResponseInfo extends StatelessWidget {
   }
 }
 
-class _QuestionsStatus extends StatelessWidget {
+class _QuestionsStatus extends StatefulWidget {
   
+  @override
+  __QuestionsStatusState createState() => __QuestionsStatusState();
+}
+
+class __QuestionsStatusState extends State<_QuestionsStatus> {
+
   final double _cardHeight = 120;
-
-  final Stream<DocumentSnapshot> userDocumentStream = Firestore.instance
-                      .collection("userTriviaRanking")
-                      .document(selectedActiveTriviaBloc.selectedActiveTrivia.id)
-                      .snapshots();
-
   UserPreferences prefs = UserPreferences();
+  List<String> questions = selectedActiveTriviaBloc.selectedActiveTrivia.questions;
+
+  int correctCounter = 0;
+  int wrongCounter = 0;
+  int notAnsweredCounter = 0;
+
+  @override
+  void initState() { 
+    super.initState();
+  }
+
+  int _getContainNumber(List<String> mIterable) {
+    int counter = 0;
+    mIterable.forEach((item) {
+      if (questions.contains(item)) counter += 1;
+    });
+    return counter;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: _cardHeight,
-      width: double.infinity,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Expanded(
-            child: StreamBuilder(
-              stream: userDocumentStream,
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  DocumentSnapshot documentSnapshot = snapshot.data;
-                  Map<String, dynamic> ownProfileData = Map<String, dynamic>();
+    return StreamBuilder(
+      stream: userSummaryBloc.userSummaryStream,
+      builder: (context, summarySnapshot) {
+        if (summarySnapshot.hasData) {
+          UserSummary auxSummary = UserSummary.fromDocumentList(summarySnapshot.data.documents);
+          UserSummary ownUserSummary = auxSummary.getOwnUserSummary();
 
-                  ownProfileData = documentSnapshot.data["ranking"].firstWhere((element) => element["userId"] == prefs.id);
+          correctCounter = _getContainNumber(ownUserSummary.correctAnswers);
+          wrongCounter = _getContainNumber(ownUserSummary.wrongQuestions);
+          notAnsweredCounter = _getContainNumber(ownUserSummary.notAnsweredQuestions);
 
-                  return TriviasStatusCard.correct(
-                    mLabel: 'Correctas', 
-                    mTriviasNumber: ownProfileData["correct"]
-                  );
-                }
-                return Container();
-              },
-            )
-          ),
-          Expanded(
-            child: StreamBuilder(
-              stream: userDocumentStream,
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  DocumentSnapshot documentSnapshot = snapshot.data;
-                  Map<String, dynamic> ownProfileData = Map<String, dynamic>();
-
-                  if (documentSnapshot.data["ranking"].isNotEmpty) {
-                    ownProfileData = documentSnapshot.data["ranking"].firstWhere((element) => element["userId"] == prefs.id);
-                  }
-
-                  return TriviasStatusCard.wrong(
+          return Container(
+            height: _cardHeight,
+            width: double.infinity,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Expanded(
+                  child: TriviasStatusCard.correct(
+                          mLabel: 'Correctas', 
+                          mTriviasNumber: correctCounter
+                        )
+                ),
+                Expanded(
+                  child: TriviasStatusCard.wrong(
                     mLabel: 'Incorrectas', 
-                    mTriviasNumber: ownProfileData.isEmpty 
-                                    ? 0
-                                    : ownProfileData["wrong"]
-                  );
-                }
-                return Container();
-              },
-            )
-          ),
-          Expanded(
-            child: StreamBuilder(
-              stream: userDocumentStream,
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  DocumentSnapshot documentSnapshot = snapshot.data;
-                  Map<String, dynamic> ownProfileData = Map<String, dynamic>();
-
-                  if (documentSnapshot.data["ranking"].length > 0) {
-                    ownProfileData = documentSnapshot.data["ranking"].firstWhere((element) => element["userId"] == prefs.id);
-                    return TriviasStatusCard.neutral(
-                      mLabel: 'Sin respuesta', 
-                      mTriviasNumber: ownProfileData["notAnswered"]
-                    );
-                  }
-                  return Container();
-                }
-                return Container();
-              },
-            )
-          )
-        ],
-      ),
+                    mTriviasNumber: wrongCounter
+                  )
+                ),
+                Expanded(
+                  child: TriviasStatusCard.neutral(
+                    mLabel: 'Sin respuesta', 
+                    mTriviasNumber: notAnsweredCounter
+                  )
+                )
+              ],
+            ),
+          );
+        }
+        return Container();
+      },
     );
   }
 }

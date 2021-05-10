@@ -1,4 +1,4 @@
-package com.example.tecnonautas_app
+package com.tecnonautasbolivia.tecnonautas
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity

@@ -66,14 +66,26 @@ class _EditProfilePageState extends State<EditProfilePage> {
               _editPhoto(),
               _profileData(),
               SizedBox(height: _verticalSpacing),
-              GradientButton(
-                mRadius: _buttonRadius,
-                mText: _saveChangesLbl(), 
-                mColors: <Color> [
-                  accent,
-                  primary
-                ], 
-                mOnPressed: () => _saveChanges(context)
+              StreamBuilder(
+                initialData: false,
+                stream: editProfileBloc.correctFormDataStream,
+                builder: (context, snapshot) {
+                  bool correctForm = snapshot.data ?? false;
+                  return GradientButton(
+                    mRadius: _buttonRadius,
+                    mText: _saveChangesLbl(),
+                    mColors: correctForm ? <Color> [
+                      accent,
+                      primary
+                    ] : <Color> [
+                      Colors.grey,
+                      Colors.grey
+                    ],
+                    mOnPressed: correctForm
+                      ? () => _saveChanges(context)
+                      : null
+                  );
+                },
               )
             ],
           ),
@@ -243,14 +255,34 @@ class _EditProfilePageState extends State<EditProfilePage> {
   void _saveChanges(context) async {
     try {
       showLoading(context);
-      final response = await editProfileBloc.updateProfile();
+      await editProfileBloc.editProfile();
       
-      if (response) {
-        Navigator.pop(context);
-        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => PortalHomePage()), (route) => false);
-      }
+      Navigator.pop(context);
+      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => PortalHomePage()), (route) => false);
     } catch (error) {
       Navigator.pop(context);
+      showDialog(
+        barrierDismissible: true,
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            content: Text(
+              error.toString().substring(11), 
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.normal,
+                fontSize: 18
+              )
+            ),
+            actions: [
+              FlatButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text("Aceptar"),
+              )
+            ],
+          );
+        }
+      );
     }
 
   }

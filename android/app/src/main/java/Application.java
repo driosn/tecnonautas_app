@@ -1,4 +1,4 @@
-package com.example.tecnonautas_app;
+package com.tecnonautasbolivia.tecnonautas;
 
 import io.flutter.app.FlutterApplication;
 import io.flutter.plugin.common.PluginRegistry;

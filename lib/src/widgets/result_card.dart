@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tecnonautas_app/core/bloc/user_coins/user_coins_bloc.dart';
 import 'package:tecnonautas_app/src/resources/app_colors.dart';
 
 class ResultCard extends StatelessWidget {
@@ -6,6 +7,8 @@ class ResultCard extends StatelessWidget {
   final String mResultDescription;
   String mResultTitle;
   Color mResultColor;
+
+  UserCoinsBloc userCoinsBloc = UserCoinsBloc();
 
   ResultCard.correct({@required this.mResultDescription}) {
     mResultTitle = "CORRECTO!!!";

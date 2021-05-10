@@ -18,8 +18,8 @@ class Router {
     switch(settings.name) {
       case '/':
         // return MaterialPageRoute(builder: (_) => VerifyPhone());
-        return MaterialPageRoute(builder: (_) => InitPage());
-        return MaterialPageRoute(builder: (_) => AuthPage());
+        // return MaterialPageRoute(builder: (_) => InitPage());
+        // return MaterialPageRoute(builder: (_) => AuthPage());
         return MaterialPageRoute(builder: (_) => PortalHomePage());
         // return MaterialPageRoute(builder: (_) => TriviaStatusPage());
         // return MaterialPageRoute(builder: (_) => FinishedTriviaPage());

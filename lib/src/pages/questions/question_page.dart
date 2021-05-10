@@ -5,6 +5,7 @@ import 'package:tecnonautas_app/core/bloc/question/question_timer_bloc.dart';
 import 'package:tecnonautas_app/core/bloc/question/selected_question_bloc.dart';
 import 'package:tecnonautas_app/core/bloc/select_active_trivia/selected_trivia_bloc.dart';
 import 'package:tecnonautas_app/core/bloc/selected_answer/selected_answer_bloc.dart';
+import 'package:tecnonautas_app/core/bloc/user_summary/user_summary_bloc.dart';
 import 'package:tecnonautas_app/core/bloc/user_trivia_ranking/user_trivia_ranking_bloc.dart';
 import 'package:tecnonautas_app/core/models/question.dart';
 import 'package:tecnonautas_app/src/pages/questions/widgets/question_card.dart';
@@ -81,7 +82,7 @@ class _QuestionPageState extends State<QuestionPage> {
                     QuestionCard(mQuestionLbl: currentQuestion.questionLbl),
                     SizedBox(height: _spacingSize),
                     TimerContainer(
-                      mSecondsDuration: 10,
+                      mSecondsDuration: currentQuestion.questionTime,
                       mTimerBloc: _questionTimerBloc,
                     ),
                     SizedBox(height: _spacingSize * 2),
@@ -116,14 +117,22 @@ class _QuestionPageState extends State<QuestionPage> {
           return _pieceButtons(context, mQuestion);
         } else {
 
-          if (selectedAnswerBloc.selectedAnswer == "") selectedAnswerBloc.changeSelectedAnswer("No respondido");
-          selectedAnswerBloc.updateSelectedAnswer(mCorrectAnswer: mQuestion.respCorrect);
+          if (selectedAnswerBloc.selectedAnswer == "") {
+            // selectedAnswerBloc.changeSelectedAnswer("No respondido");
+            userSummaryBloc.postNotAnswered(mQuestion.questionLbl);
+          } else if (selectedAnswerBloc.selectedAnswer == mQuestion.respCorrect) {
+            userSummaryBloc.postCorrectAnswer(mQuestion.questionLbl); 
+          } else if (selectedAnswerBloc.selectedAnswer != mQuestion.respCorrect) {
+            userSummaryBloc.postWrongAnswer(mQuestion.questionLbl);
+          }
+
+          // selectedAnswerBloc.updateSelectedAnswer(mCorrectAnswer: mQuestion.respCorrect);
           
-          userTriviaRankingBloc.updateTriviaResult(
-            mTriviaId: selectedAnswerBloc.parentTrivia.id,
-            mCorrectAnswer: mQuestion.respCorrect,
-            mSelectedAnswer: selectedAnswerBloc.selectedAnswer
-          );
+          // userTriviaRankingBloc.updateTriviaResult(
+            // mTriviaId: selectedAnswerBloc.parentTrivia.id,
+            // mCorrectAnswer: mQuestion.respCorrect,
+            // mSelectedAnswer: selectedAnswerBloc.selectedAnswer
+          // );
 
           return _questionResult(context, mQuestion);
         }

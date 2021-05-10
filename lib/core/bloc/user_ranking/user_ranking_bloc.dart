@@ -32,7 +32,7 @@ class UserRankingBloc {
                                                         // changeUserRankingList(auxiliarUserRankingList);   
                                                       // });
 
-  Stream<QuerySnapshot> get queryUserRankingStream => Firestore.instance.collection("userRanking").snapshots();
+  Stream<QuerySnapshot> get userStream => Firestore.instance.collection("user").snapshots();
 
   Stream<List<UserRanking>> get userRankingListStream => _userRankingListStreamController.stream;
   Stream<bool> get needToUpdatePointsStream => _needToUpdatePointsController.stream;

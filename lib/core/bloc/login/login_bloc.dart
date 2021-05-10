@@ -23,13 +23,15 @@ class LoginBloc {
 
   Future<User> checkUserLogin() async {
     QuerySnapshot response = await Firestore.instance
-                                      .collection("users")
+                                      .collection("user")
                                       .where("username", isEqualTo: username)
                                       .getDocuments();
-  
+    
+
     if (response.documents.length > 0) {
       DocumentSnapshot document = response.documents.first;
-      if (Password.verify(password, document.data["password"])) {
+      // bool correctPassword = Password.verify(password, document.data["password"]);
+      if (encodePassword(password) == document.data["password"]) {
         return User.fromDocument(document.data);
       }
       return null;
@@ -37,8 +39,17 @@ class LoginBloc {
     return null;
   }
 
+  String encodePassword(String currentPassword) {
+    String encodedPassword = "";
+    for(int i = 0; i < currentPassword.length; i++) {
+      encodedPassword += String.fromCharCode(currentPassword.codeUnitAt(i) + 1);
+    }
+    return encodedPassword;
+  }
+
   void dispose() {
     _usernameController?.close();
+    _passwordController?.close();
   }
 
 }

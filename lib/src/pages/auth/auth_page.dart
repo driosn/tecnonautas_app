@@ -6,7 +6,7 @@ import 'package:tecnonautas_app/src/resources/app_colors.dart';
 
 class AuthPage extends StatelessWidget {
   
-  AuthBloc authBloc = AuthBloc();
+  final AuthBloc authBloc = AuthBloc();
 
   @override
   Widget build(BuildContext context) {

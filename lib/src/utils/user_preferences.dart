@@ -64,6 +64,10 @@ class UserPreferences {
     return _prefs.getString("questions_answered") ?? "{}";
   }
 
+  int get userCoins {
+    return _prefs.getInt("user_coins") ?? 0;
+  }
+
   // Local Trivias
   List<String> get triviasLocalInfo {
     return _prefs.getStringList("trivias_local_info") ?? List<String>();
@@ -115,6 +119,10 @@ class UserPreferences {
 
   void updateQuestionsAnswered(String mQuestionsAnswered) {
     _prefs.setString("questions_answered", mQuestionsAnswered);
+  }
+
+  void updateUserCoins({int mNewCoins}) {
+    _prefs.setInt("user_coins", mNewCoins);
   }
 
   // Local Trivias Info
@@ -378,6 +386,9 @@ class UserPreferences {
     updateAvatar(null);
     updateCity(null);
     updateIsValidated(null);
+    updateQuestionsAnswered(null);
+    updateUserCoins(mNewCoins: null);
+    updateTriviasLocalInfo(null);
+    updateTriviasLocalScores(null);
   }
-  
 }

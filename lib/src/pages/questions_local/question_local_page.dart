@@ -5,6 +5,7 @@ import 'package:tecnonautas_app/core/bloc/question/question_timer_bloc.dart';
 import 'package:tecnonautas_app/core/bloc/question/selected_question_bloc.dart';
 import 'package:tecnonautas_app/core/bloc/select_active_trivia/selected_trivia_bloc.dart';
 import 'package:tecnonautas_app/core/bloc/selected_answer/selected_answer_bloc.dart';
+import 'package:tecnonautas_app/core/bloc/user_coins/user_coins_bloc.dart';
 import 'package:tecnonautas_app/core/bloc/user_trivia_ranking/user_trivia_ranking_bloc.dart';
 import 'package:tecnonautas_app/core/models/question.dart';
 import 'package:tecnonautas_app/src/pages/questions/widgets/question_card.dart';
@@ -27,6 +28,8 @@ class QuestionLocalPage extends StatefulWidget {
 
 class _QuestionLocalPageState extends State<QuestionLocalPage> {
   
+  UserCoinsBloc userCoinsBloc = UserCoinsBloc();
+
   QuestionTimerBloc _questionTimerBloc = new QuestionTimerBloc();
   final double pieceHeight = 140;
   final double containerHeight = 290;
@@ -134,6 +137,10 @@ class _QuestionLocalPageState extends State<QuestionLocalPage> {
 
     SelectedAnswerBloc bloc = SelectedAnswerBloc();
 
+    if (bloc.selectedAnswer == mQuestion.respCorrect) {
+      userCoinsBloc.addFiveCoins();
+    }
+
     return Container(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -143,9 +150,7 @@ class _QuestionLocalPageState extends State<QuestionLocalPage> {
           ? ResultCard.correct(
               mResultDescription: mQuestion.responses[mQuestion.respCorrect]
             )
-          : ResultCard.incorrect(
-              mResultDescription: mQuestion.responses[mQuestion.respCorrect]
-            ),
+          : ResultCard.incorrect(mResultDescription: mQuestion.responses[mQuestion.respCorrect]),
 
           SizedBox(height: _spacing),
           TecnonautasButton(
@@ -207,7 +212,7 @@ class _QuestionLocalPageState extends State<QuestionLocalPage> {
   void _okAction(BuildContext context) {
     Navigator.pushReplacement(
       context, MaterialPageRoute(builder: (_) => TriviaStatusPageLocal(
-        mTrivia: selectedQuestionBloc.parentTrivia,
-      )));
+      mTrivia: selectedQuestionBloc.parentTrivia,
+    )));
   }
 }

@@ -57,98 +57,102 @@ class VerifyPhone extends StatelessWidget {
   Widget _sendCodeButton(context) {
     return MainYellowButton(
       mText: 'Enviar codigo',
-      mOnPressed: () {
-        FirebaseAuth _auth = FirebaseAuth.instance;
-
-        _auth.verifyPhoneNumber(
-          phoneNumber: "+59167305722", 
-          timeout: Duration(seconds: 120), 
-          verificationCompleted: (authCredential) {
-            print("Verification Completed");
-            print(authCredential);
-          }, 
-          verificationFailed: (authException) {
-            print("Verification Failed");
-            print(authException);
-          }, 
-          codeSent: (String verificationid, [int forceResendingToken]) {
-            showDialog(
-              context: context,
-              barrierDismissible: false,
-              builder: (context) => AlertDialog(
-                title: Text("Ingresa codigo de verificación"),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      style: TextStyle(color: accent),
-                      controller: _codeController,
-                      keyboardType: TextInputType.numberWithOptions(
-                        signed: false, 
-                        decimal: false
-                      ),
+      mOnPressed: () async {
+        try {
+          FirebaseAuth _auth = FirebaseAuth.instance;
+  
+          await _auth.verifyPhoneNumber(
+            phoneNumber: "+591" + this.mUser.phone, 
+            timeout: Duration(seconds: 120), 
+            verificationCompleted: (authCredential) {
+              print("Verification Completed");
+              print(authCredential);
+            }, 
+            verificationFailed: (authException) {
+              print("Verification Failed");
+              print(authException);
+            }, 
+            codeSent: (String verificationid, [int forceResendingToken]) {
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => AlertDialog(
+                  title: Text("Ingresa codigo de verificación"),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextField(
+                        style: TextStyle(color: accent),
+                        controller: _codeController,
+                        keyboardType: TextInputType.numberWithOptions(
+                          signed: false, 
+                          decimal: false
+                        ),
+                      )
+                    ],
+                  ),
+  
+                  actions: [
+                    MainYellowButton(
+                      mText: 'Verificar',
+                      mOnPressed: () {
+                        FirebaseAuth auth = FirebaseAuth.instance;
+  
+                        smsCode = _codeController.text.trim();
+  
+  
+                        final _credential = PhoneAuthProvider.getCredential(
+                          verificationId: verificationid, 
+                          smsCode: smsCode
+                        );
+  
+                        print("Credential");
+                        print(_credential.toString());
+                        print("Fin de credencial");
+  
+                        auth.signInWithCredential(_credential)
+                            .then((AuthResult result) async {
+                              
+                              await Firestore.instance.collection("user").document(mUser.id).updateData({
+                                "isValidated" : true
+                              });
+  
+                              UserPreferences prefs = UserPreferences();
+                              prefs.updateCompleteUser(mUser);
+  
+                              UserRankingBloc userRankingBloc = UserRankingBloc();
+                              await userRankingBloc.createOrUpdateUserRanking();
+  
+                              Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => PortalHomePage()
+                                ),
+                                (route) => false
+                              );
+                            })
+                            .catchError((e) {
+                              
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: Text("Codigo incorrecto"),
+                                  );
+                                }
+                              );
+                            });
+                      }, 
                     )
                   ],
-                ),
-
-                actions: [
-                  MainYellowButton(
-                    mText: 'Verificar',
-                    mOnPressed: () {
-                      FirebaseAuth auth = FirebaseAuth.instance;
-
-                      smsCode = _codeController.text.trim();
-
-
-                      final _credential = PhoneAuthProvider.getCredential(
-                        verificationId: verificationid, 
-                        smsCode: smsCode
-                      );
-
-                      print("Credential");
-                      print(_credential.toString());
-                      print("Fin de credencial");
-
-                      auth.signInWithCredential(_credential)
-                          .then((AuthResult result) async {
-                            
-                            UserPreferences prefs = UserPreferences();
-                            prefs.updateCompleteUser(mUser);
-
-                            await Firestore.instance.collection("users").document(mUser.id).updateData({
-                              "isValidated" : true
-                            });
-
-                            UserRankingBloc userRankingBloc = UserRankingBloc();
-                            await userRankingBloc.createOrUpdateUserRanking();
-
-                            Navigator.pushAndRemoveUntil(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => PortalHomePage()
-                              ),
-                              (route) => false
-                            );
-                          })
-                          .catchError((e) {
-                            
-                            showDialog(
-                              context: context,
-                              builder: (context) {
-                                return AlertDialog(
-                                  title: Text("Codigo incorrecto"),
-                                );
-                              }
-                            );
-                          });
-                    }, 
-                  )
-                ],
-              )
-            );
-          }, 
-          codeAutoRetrievalTimeout: null
-        );
+                )
+              );
+            }, 
+            codeAutoRetrievalTimeout: null
+          );
+        } catch (error) {
+          print(error.toString());
+        }
       },
     );
   }

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:tecnonautas_app/core/bloc/active_trivia/active_trivia_bloc.dart';
+import 'package:tecnonautas_app/core/bloc/local_trivias/local_trivias_bloc.dart';
 import 'package:tecnonautas_app/core/bloc/question/selected_question_bloc.dart';
 import 'package:tecnonautas_app/core/bloc/select_active_trivia/selected_trivia_bloc.dart';
 import 'package:tecnonautas_app/core/bloc/selected_answer/selected_answer_bloc.dart';
@@ -190,7 +191,13 @@ class _TriviaStatusPageLocalState extends State<TriviaStatusPageLocal> {
               mHeight: _cardHeight, 
               mTitle: 'Gana', 
               mIcon: Image.asset('assets/images/gold_coin.png'), 
-              mChild: _cardContent(context, widget.mTrivia.points.toString(), 'Puntos', isGold: true)
+              // mChild: _cardContent(context, widget.mTrivia.points.toString(), 'Puntos', isGold: true)
+              mChild: _cardContent(
+                context,
+                (widget.mTrivia.points * widget.mTrivia.qtyPreg).toString(), 
+                'Puntos', 
+                isGold: true
+              )
             ),
           ),
         ],
@@ -206,11 +213,12 @@ class _TriviaStatusPageLocalState extends State<TriviaStatusPageLocal> {
         children: List.generate(widget.mTrivia.questions.length, (index) {
           
           String questionResult = prefs.getQuestionStatus(widget.mTrivia.questions[index]);
-          DBProvider.db.setTriviaToPlayed(int.parse(widget.mTrivia.id));
+          localTriviasBloc.setTriviaToComplete(int.parse(widget.mTrivia.id));
 
           if (questionResult == "Correct") {
             return QuestionStatusButton.correct(
-              mPointsNumber: double.parse((widget.mTrivia.points / widget.mTrivia.questions.length).toStringAsFixed(1)), 
+              // mPointsNumber: double.parse((widget.mTrivia.points / widget.mTrivia.questions.length).toStringAsFixed(1)), 
+              mPointsNumber: 10,
               mQuestionNumber: index + 1, 
               mOnPressed: () {}
             );
@@ -227,7 +235,8 @@ class _TriviaStatusPageLocalState extends State<TriviaStatusPageLocal> {
           wasPlayed = false;
           DBProvider.db.setTriviaToNotPlayed(int.parse(widget.mTrivia.id));
           return QuestionStatusButton.ready(
-            mPointsNumber: double.parse((widget.mTrivia.points / widget.mTrivia.questions.length).toStringAsFixed(1)),
+            // mPointsNumber: double.parse((widget.mTrivia.points / widget.mTrivia.questions.length).toStringAsFixed(1)),
+            mPointsNumber: 10,
             mQuestionNumber: index + 1, 
             mOnPressed: () {
               Question question  = Question(

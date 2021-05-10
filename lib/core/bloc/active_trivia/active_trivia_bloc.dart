@@ -14,7 +14,7 @@ class ActiveTriviaBloc {
   UserPreferences prefs = UserPreferences();
 
   // Streams 
-  Stream<QuerySnapshot> get activeTriviaStream => Firestore.instance.collection('trivias')
+  Stream<QuerySnapshot> get activeTriviaStream => Firestore.instance.collection('trivia')
                                                   .where("isActive", isEqualTo: true)
                                                   .snapshots();
 

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:password/password.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:tecnonautas_app/core/bloc/user_summary/user_summary_bloc.dart';
 import 'package:tecnonautas_app/src/utils/utils.dart';
 import 'package:tecnonautas_app/src/utils/validators.dart';
 import 'package:uuid/uuid.dart';
@@ -21,6 +22,7 @@ class RegisterBloc with Validators {
   // Controllers 
   BehaviorSubject<String> _nameController = BehaviorSubject<String>();
   BehaviorSubject<String> _passwordController = BehaviorSubject<String>();
+  BehaviorSubject<String> _confirmPasswordController = BehaviorSubject<String>();
   BehaviorSubject<String> _lastnameController = BehaviorSubject<String>();
   BehaviorSubject<String> _nicknameController = BehaviorSubject<String>();
   BehaviorSubject<String> _birthdateController = BehaviorSubject<String>();
@@ -33,6 +35,7 @@ class RegisterBloc with Validators {
   // Streams
   Stream<String> get nameStream => _nameController.stream.transform(validateEmptyString);
   Stream<String> get passwordStream => _passwordController.stream.transform(validateEmptyString);
+  Stream<String> get confirmPasswordStream => _confirmPasswordController.stream.transform(validateEmptyString);
   Stream<String> get lastnameStream => _lastnameController.stream.transform(validateEmptyString);
   Stream<String> get nicknameStream => _nicknameController.stream.transform(validateEmptyString);
   Stream<String> get birthdateStream => _birthdateController.stream;
@@ -45,6 +48,7 @@ class RegisterBloc with Validators {
   // Inputs
   Function(String) get changeName => _nameController.sink.add;
   Function(String) get changePassword => _passwordController.sink.add;
+  Function(String) get changeConfirmPassword => _confirmPasswordController.sink.add;
   Function(String) get changeLastname => _lastnameController.sink.add;
   Function(String) get changeNickname => _nicknameController.sink.add;
   Function(String) get changeBirthdate => _birthdateController.sink.add;
@@ -57,6 +61,7 @@ class RegisterBloc with Validators {
   // Value
   String get name => _nameController.value;
   String get password => _passwordController.value;
+  String get confirmPassword => _confirmPasswordController.value;
   String get lastname => _lastnameController.value;
   String get nickname => _nicknameController.value;
   String get birthdate => _birthdateController.value;
@@ -80,39 +85,69 @@ class RegisterBloc with Validators {
     (a, b, c, d, e, f, g, h, i) => true
   );
 
-  Future<void> createNewUser() async {
-    String uniqueId = _uuid.v1();
+  void reInitValue() {
+    this.changeName(null);
+    this.changePassword(null);
+    this.changeConfirmPassword(null);
+    this.changeLastname(null);
+    this.changeNickname(null);
+    this.changeBirthdate(null);
+    this.changePhone(null);
+    this.changeGrade(null);
+    this.changeAvatar(null);
+    this.changeCity(null);
+  }
 
-    if (_stringNotHasNumber(name) && _stringNotHasNumber(lastname)) {
-      if ((this.phone.length == 8 || this.phone.length == 7) && _utils.isNumeric(this.phone)) {
-        if (this.password.length >= 8) {
-          QuerySnapshot response = await Firestore.instance.collection("users").where("username", isEqualTo: this.nickname).getDocuments();
-          if (response.documents.length == 0) {
-            await Firestore.instance.collection("users").document(uniqueId).setData({
-              "id" : uniqueId,
-              "name" : this.name,
-              "password" : Password.hash(this.password, new PBKDF2()),
-              "lastname" : this.lastname,
-              "username" : this.nickname,
-              "birthdate" : this.birthdate,
-              "phone" : this.phone,
-              "grade" : this.grade,
-              "avatar" : this.avatar,
-              "city" : this.city,
-              "isValidated" : false
-            });
+  Future<void> createNewUser() async {
+      String uniqueId = _uuid.v1();
+
+      if (confirmPassword == password) {
+        if (_stringNotHasNumber(name) && _stringNotHasNumber(lastname)) {
+          if ((this.phone.length == 8 || this.phone.length == 7) && _utils.isNumeric(this.phone)) {
+            if (this.password.length >= 8) {
+              QuerySnapshot response = await Firestore.instance.collection("user").where("username", isEqualTo: this.nickname).getDocuments();
+              if (response.documents.length == 0) {
+                await Firestore.instance.collection("user").document(uniqueId).setData({
+                  "id" : uniqueId,
+                  "name" : this.name,
+                  "password": encodePassword(this.password),
+                  "lastname" : this.lastname,
+                  "username" : this.nickname,
+                  "birthdate" : this.birthdate,
+                  "phone" : this.phone,
+                  "grade" : this.grade,
+                  "avatar" : this.avatar,
+                  "city" : this.city,
+                  "score" : 0,
+                  "isValidated" : false
+                });
+  
+                userSummaryBloc.createNewuserSummary(uniqueId);
+              } else {
+                throw new Exception("Nombre de usuario ya existente, elige otro por favor");
+              }
+            } else {
+              throw new Exception("La contraseña debe contener mínimo 8 caracteres");
+            }
           } else {
-            throw new Exception("Nombre de usuario ya existente, elige otro por favor");
+            throw new Exception("El numero de celular debe ser correcto");
           }
         } else {
-          throw new Exception("La contraseña debe contener mínimo 8 caracteres");
+          throw new Exception("El nombre y apellido no deben contener números");
         }
       } else {
-        throw new Exception("El numero de celular debe ser correcto");
+        print(confirmPassword);
+        print(password);
+        throw new Exception("Las dos contraseñas no coinciden");
       }
-    } else {
-      throw new Exception("El nombre y apellido no deben contener números");
+  }
+
+  String encodePassword(String currentPassword) {
+    String encodedPassword = "";
+    for(int i = 0; i < currentPassword.length; i++) {
+      encodedPassword += String.fromCharCode(currentPassword.codeUnitAt(i) + 1);
     }
+    return encodedPassword;
   }
 
   void dispose() {
@@ -125,6 +160,8 @@ class RegisterBloc with Validators {
     _gradeController?.close();
     _avatarController?.close();
     _cityController?.close();
+    _confirmPasswordController?.close();
+    _isLoadingController?.close();
   }
 
   bool _stringNotHasNumber(String mValue) {

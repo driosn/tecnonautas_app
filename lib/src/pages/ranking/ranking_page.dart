@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tecnonautas_app/core/bloc/user_ranking/user_ranking_bloc.dart';
+import 'package:tecnonautas_app/core/models/user.dart';
 import 'package:tecnonautas_app/core/models/user_ranking.dart';
 import 'package:tecnonautas_app/src/pages/ranking/widgets/ranking_data_bar.dart';
 import 'package:tecnonautas_app/src/pages/ranking/widgets/ranking_data_own.dart';
@@ -20,6 +21,8 @@ class RankingPage extends StatefulWidget {
 }
 
 class _RankingPageState extends State<RankingPage> {
+
+  UserPreferences prefs = UserPreferences();
 
   @override
   void initState() {
@@ -63,11 +66,6 @@ class _AvatarInfo extends StatelessWidget {
                 children: <Widget>[
                   TecnonautasAppbar(),
                   _AvatarSummary(),
-                  // Text(
-                    // 'TRIVIAS', 
-                    // style: TextStyle(fontWeight: FontWeight.bold, color: darkGrey)
-                  // ),
-                  // _TriviaStatusSection(),
                 ],
               ),
             ),
@@ -119,23 +117,32 @@ class _TriviaStatusSection extends StatelessWidget {
 
     @override
     Widget build(BuildContext context) {
-      
+      // prefs.updateId("945509d0-67d8-11eb-9e10-bfadeb8ff1c8");
+
+
       final ownProfileItems = <RankingDataItem> [
         RankingDataItem(
           mTitle: _rankingTitle(context, 'Puesto', accentPurple),
           mContent: StreamBuilder<QuerySnapshot>(
-            stream: userRankingBloc.queryUserRankingStream,
+            stream: userRankingBloc.userStream,
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 QuerySnapshot querySnapshotResponse = snapshot.data;
-                List<UserRanking> auxiliarUserRankingList = List<UserRanking>();
+                List<User> allUsers = List<User>();
 
+                print("Inicio query");
                 querySnapshotResponse.documents.forEach((document) {
-                  auxiliarUserRankingList.add(UserRanking.fromSnapshotData(document.data));
+                  print(document.data["id"]);
+                  allUsers.add(User.fromDocument(document.data));
                 });
-                auxiliarUserRankingList.sort((userRankingA, userRankingB) => userRankingB.points.compareTo(userRankingA.points));
+                print("Fin query");
+                print("INicio sort");
 
-                int myOwnPosition = auxiliarUserRankingList.indexWhere((element) => element.userId == prefs.id);
+                allUsers.sort((userA, userB) => userB.score.compareTo(userA.score));
+                
+                print("Fin sort");
+
+                int myOwnPosition = allUsers.indexWhere((element) => element.id == prefs.id);
                 return _rankingContent(context, "${myOwnPosition + 1}", accent);
               }
 
@@ -148,18 +155,18 @@ class _TriviaStatusSection extends StatelessWidget {
         RankingDataItem(
           mTitle: _rankingTitle(context, 'Puntos:', accentBlue),
           mContent: StreamBuilder<QuerySnapshot>(
-            stream: userRankingBloc.queryUserRankingStream,
+            stream: userRankingBloc.userStream,
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 QuerySnapshot querySnapshotResponse = snapshot.data;
-                List<UserRanking> auxiliarUserRankingList = List<UserRanking>();
+                List<User> allUsers = List<User>();
 
                 querySnapshotResponse.documents.forEach((document) {
-                  auxiliarUserRankingList.add(UserRanking.fromSnapshotData(document.data));
+                  allUsers.add(User.fromDocument(document.data));
                 });
 
-                UserRanking myOwnUserRanking = auxiliarUserRankingList.firstWhere((userRanking) => userRanking.userId == prefs.id);
-                return _rankingContent(context, "${myOwnUserRanking.points.toStringAsFixed(0)}", accent);
+                User ownUser = allUsers.firstWhere((user) => user.id == prefs.id);
+                return _rankingContent(context, "${ownUser.score.toStringAsFixed(0)}", accent);
               }
 
               return _rankingContent(context, "0", accent);
@@ -219,32 +226,44 @@ class _TriviaRanking extends StatelessWidget {
           top: 12
         ),
         child: StreamBuilder<QuerySnapshot>(
-          stream: userRankingBloc.queryUserRankingStream,
+          stream: userRankingBloc.userStream,
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               QuerySnapshot querySnapshotResponse = snapshot.data;
-              List<UserRanking> auxiliarUserRankingList = List<UserRanking>();
+              List<User> allUsers = List<User>();
 
               querySnapshotResponse.documents.forEach((document) {
-                auxiliarUserRankingList.add(UserRanking.fromSnapshotData(document.data));
+                allUsers.add(User.fromDocument(document.data));
               });
-              auxiliarUserRankingList.sort((userRankingA, userRankingB) => userRankingB.points.compareTo(userRankingA.points));
+              allUsers.sort((userA, userB) => userB.score.compareTo(userA.score));
 
-              return ListView.separated(
-                physics: BouncingScrollPhysics(),
-                separatorBuilder: (context, index) => SizedBox(height: 15),
-                itemCount: auxiliarUserRankingList.length > 3 ? 3 : auxiliarUserRankingList.length,
-                itemBuilder: (context, index) {
+              bool rankingExists = false;
 
-                  return RankingDataSimple(
-                    mItem: RankingDataItem(
-                      mTitle: _rankingTitle(context, auxiliarUserRankingList[index].username), 
-                      mContent: _rankingContent(context, '${auxiliarUserRankingList[index].points.toStringAsFixed(0)} puntos'), 
-                      mTrailing: _rankingTrailing(context, (index + 1).toString())
-                    ),
-                    mAvatar: auxiliarUserRankingList[index].userAvatar,
-                  );
-                }
+              allUsers.forEach((user) {
+                if (user.score > 0) { rankingExists = true; }
+              });
+
+              if (rankingExists) {
+                return ListView.separated(
+                  physics: BouncingScrollPhysics(),
+                  separatorBuilder: (context, index) => SizedBox(height: 15),
+                  itemCount: allUsers.length > 3 ? 3 : allUsers.length,
+                  itemBuilder: (context, index) {
+                  
+                    return RankingDataSimple(
+                      mItem: RankingDataItem(
+                        mTitle: _rankingTitle(context, allUsers[index].username), 
+                        mContent: _rankingContent(context, '${allUsers[index].score.toStringAsFixed(0)} puntos'), 
+                        mTrailing: _rankingTrailing(context, (index + 1).toString())
+                      ),
+                      mAvatar: allUsers[index].avatar,
+                    );
+                  }
+                );
+              }
+
+              return Center(
+                child: Text("No existe la cantidad de usuarios para mostrar un ranking"),
               );
             }
 

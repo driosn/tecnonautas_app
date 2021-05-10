@@ -95,13 +95,18 @@ class Login extends StatelessWidget {
     return MainYellowButton(
       mText: 'INGRESAR',
       mOnPressed: () async {
-        showLoading(context);
-        final User response = await loginBloc.checkUserLogin();
-        Navigator.pop(context);
+        try {
+          showLoading(context);
+          final User response = await loginBloc.checkUserLogin();
+          Navigator.pop(context);
 
-        if (response != null) {
-          _verifyIsValidated(context, response);
-        } else {
+          if (response != null) {
+            _verifyIsValidated(context, response);
+          } else {
+            _showIncorrectUserOrPwdDialog(context);
+          }
+        } catch (e) {
+          Navigator.pop(context);
           _showIncorrectUserOrPwdDialog(context);
         }
       });

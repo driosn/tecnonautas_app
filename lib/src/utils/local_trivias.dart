@@ -107,7 +107,7 @@ List<Trivia> localTrivias = [
       }
     },
     respCorrect: {
-      "question0": "resp04",
+      "question0": "resp03",
       "question1": "resp13",
       "question2": "resp21",
     }

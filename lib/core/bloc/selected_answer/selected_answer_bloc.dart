@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:rxdart/subjects.dart';
 import 'package:tecnonautas_app/core/bloc/user_ranking/user_ranking_bloc.dart';
+import 'package:tecnonautas_app/core/bloc/user_summary/user_summary_bloc.dart';
 import 'package:tecnonautas_app/core/bloc/user_trivia_ranking/user_trivia_ranking_bloc.dart';
 import 'package:tecnonautas_app/core/models/trivia.dart';
 import 'package:tecnonautas_app/core/models/user_answer.dart';
@@ -59,6 +60,7 @@ class SelectedAnswerBloc {
     responses[this.question] = this.selectedAnswer;
 
     if (this.selectedAnswer == mCorrectAnswer) {
+      userSummaryBloc.postCorrectAnswer(this.question);
       // If the answer is correct we update points also in firebase
       UserRankingBloc userRankingBloc = UserRankingBloc();
       UserTriviaRankingBloc userTriviaRankingBloc = UserTriviaRankingBloc();
@@ -70,6 +72,10 @@ class SelectedAnswerBloc {
 
       scores[this.question] = valuePerQuestion;
       totalScore = totalScore + valuePerQuestion;
+    } else if (this.selectedAnswer == "") {
+      userSummaryBloc.postNotAnswered(this.question);
+    } else {
+      userSummaryBloc.postWrongAnswer(this.question);
     }
 
     await Firestore.instance.collection("userTriviaAnswers").document(prefs.id).updateData({

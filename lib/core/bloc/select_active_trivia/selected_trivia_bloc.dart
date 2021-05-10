@@ -26,44 +26,43 @@ class SelectedActiveTriviaBloc {
   Trivia get selectedActiveTrivia => _selectedActiveTriviaController.value;
 
   // Firestore
-  
+
 
   Future<void> playActiveTrivia() async {
     List<Map<String, dynamic>> answersList = List<Map<String, dynamic>>();
 
-    try {
-      bool existsTriviaPlayed = false;
+    // try {
+      // bool existsTriviaPlayed = false;
 
+    //   final document = await Firestore.instance.collection("userTriviaAnswers").document(prefs.id).get();
+    //   if (document.exists) {
+    //     final data = document.data;
+    //     if (data.containsKey("answers")) {
+    //       List<dynamic> auxList = data["answers"];
+    //       List<Map<String, dynamic>> auxMapList = List<Map<String, dynamic>>();
+    //       auxList.forEach((element) {
+    //         existsTriviaPlayed = element["triviaName"] == selectedActiveTrivia.name;
+    //         auxMapList.add(Map<String, dynamic>.from(element));
+    //       });
 
-      final document = await Firestore.instance.collection("userTriviaAnswers").document(prefs.id).get();
-      if (document.exists) {
-        final data = document.data;
-        if (data.containsKey("answers")) {
-          List<dynamic> auxList = data["answers"];
-          List<Map<String, dynamic>> auxMapList = List<Map<String, dynamic>>();
-          auxList.forEach((element) {
-            existsTriviaPlayed = element["triviaName"] == selectedActiveTrivia.name;
-            auxMapList.add(Map<String, dynamic>.from(element));
-          });
+    //       answersList.addAll(auxMapList);
+    //     }
+    //   }
 
-          answersList.addAll(auxMapList);
-        }
-      }
+    //   if (!existsTriviaPlayed) answersList.add(generateNewTriviaPlay());
 
-      if (!existsTriviaPlayed) answersList.add(generateNewTriviaPlay());
-
-      if (document.exists) {
-        await document.reference.updateData({
-          "answers" : answersList
-        });
-      } else {
-        await Firestore.instance.collection("userTriviaAnswers").document(prefs.id).setData({
-          "answers" : answersList
-        });
-      } 
-    } catch(error) {
-      print(error.toString());
-    }
+    //   if (document.exists) {
+    //     await document.reference.updateData({
+    //       "answers" : answersList
+    //     });
+    //   } else {
+    //     await Firestore.instance.collection("userTriviaAnswers").document(prefs.id).setData({
+    //       "answers" : answersList
+    //     });
+    //   } 
+    // } catch(error) {
+    //   print(error.toString());
+    // }
       
     // await Firestore.instance.collection("userTriviaAnswers").document()
   }

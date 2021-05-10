@@ -4,16 +4,21 @@ import 'package:tecnonautas_app/core/bloc/active_trivia/active_trivia_bloc.dart'
 import 'package:tecnonautas_app/core/bloc/question/selected_question_bloc.dart';
 import 'package:tecnonautas_app/core/bloc/select_active_trivia/selected_trivia_bloc.dart';
 import 'package:tecnonautas_app/core/bloc/selected_answer/selected_answer_bloc.dart';
+import 'package:tecnonautas_app/core/bloc/user_summary/user_summary_bloc.dart';
+import 'package:tecnonautas_app/core/bloc/web_data/web_data_bloc.dart';
 import 'package:tecnonautas_app/core/models/question.dart';
 import 'package:tecnonautas_app/core/models/trivia.dart';
 import 'package:tecnonautas_app/core/models/user_answer.dart';
+import 'package:tecnonautas_app/core/models/user_summary.dart';
 import 'package:tecnonautas_app/core/models/user_trivia_answers.dart';
+import 'package:tecnonautas_app/core/models/web_data.dart';
 import 'package:tecnonautas_app/src/pages/finished_trivia/finished_trivia_page.dart';
 import 'package:tecnonautas_app/src/pages/finished_trivia/widgets/leave_trivia_dialog.dart';
 import 'package:tecnonautas_app/src/pages/play/play_page.dart';
 import 'package:tecnonautas_app/src/pages/trivia_status/widgets/question_status_button.dart';
 import 'package:tecnonautas_app/src/pages/trivia_status/widgets/trivia_status_description.dart';
 import 'package:tecnonautas_app/src/resources/app_colors.dart';
+import 'package:tecnonautas_app/src/utils/user_preferences.dart';
 import 'package:tecnonautas_app/src/widgets/appbar/tecnonautas_appbar.dart';
 import 'package:tecnonautas_app/src/widgets/card_container.dart';
 import 'package:tecnonautas_app/src/widgets/info_card.dart';
@@ -69,40 +74,60 @@ class TriviaStatusPage extends StatelessWidget {
     );
     
     return StreamBuilder(
-      stream: activeTriviaBloc.activeTriviaQuestionsStream,
-      builder: (context, snapshot) {
+      stream: userSummaryBloc.userSummaryStream,
+      builder: (context, summarySnapshot) {
+        if (summarySnapshot.hasData) {
+          UserSummary auxSummary = UserSummary.fromDocumentList(summarySnapshot.data.documents);
+          UserSummary ownUserSummary = auxSummary.getOwnUserSummary();
+          List<String> questions = mTrivia.questions;
 
-        if (snapshot.hasData) {
-          QuerySnapshot response = snapshot.data;
-          DocumentSnapshot document = response.documents.first;
-
-          final data = document.data;
-          List<dynamic> questions = data["questions"];
-
-          bool completedTrivia = true;
-          for(int i = 0; i < questions.length - 1; i++) {
-            if(questions[i]["wasPlayed"] == false) completedTrivia = false;
-          } 
-
-          if (completedTrivia) {
-            return StreamBuilder<DocumentSnapshot>(
-              stream: activeTriviaBloc.userTriviaAnswersStream,
-              builder: (context, snapshot) {
-
-                if (snapshot.hasData) {
-                  UserTriviaAnswers userTriviaAnswers = UserTriviaAnswers.fromDocument(snapshot.data.data);                
-                  UserAnswer userAnswer = searchTriviaNameData(userTriviaAnswers);
-
-                  if (userAnswer.responses["${questions.last["name"]}"] != null && userAnswer.responses["${questions.last["name"]}"] != "") {
-                    return FinishedTriviaPage(mParentTrivia: mTrivia);
-                  }
-                  return triviaStatusPage;
-                }
-                return Container();     
+          int playedQuestionsCounter = 0;
+          
+          questions.forEach((question) {
+            if (ownUserSummary.correctAnswers.contains(question) 
+              || ownUserSummary.wrongQuestions.contains(question)
+              || ownUserSummary.notAnsweredQuestions.contains(question)) {
+                playedQuestionsCounter += 1;
               }
-            );
+          });
+
+          bool isCompletedTrivia = playedQuestionsCounter == questions.length;
+
+          if (isCompletedTrivia) {
+            return FinishedTriviaPage(mParentTrivia: mTrivia);
           }
           return triviaStatusPage;
+          
+
+          // QuerySnapshot response = snapshot.data;
+          // DocumentSnapshot document = response.documents.first;
+// 
+          // final data = document.data;
+          // List<dynamic> questions = data["questions"];
+// 
+          // bool completedTrivia = true;
+          // for(int i = 0; i < questions.length - 1; i++) {
+            // if(questions[i]["wasPlayed"] == false) completedTrivia = false;
+          // } 
+// 
+          // if (completedTrivia) {
+            // return StreamBuilder<DocumentSnapshot>(
+              // stream: activeTriviaBloc.userTriviaAnswersStream,
+              // builder: (context, snapshot) {
+// 
+                // if (snapshot.hasData) {
+                  // UserTriviaAnswers userTriviaAnswers = UserTriviaAnswers.fromDocument(snapshot.data.data);                
+                  // UserAnswer userAnswer = searchTriviaNameData(userTriviaAnswers);
+// 
+                  // if (userAnswer.responses["${questions.last["name"]}"] != null && userAnswer.responses["${questions.last["name"]}"] != "") {
+                    // return FinishedTriviaPage(mParentTrivia: mTrivia);
+                  // }
+                  // return triviaStatusPage;
+                // }
+                // return Container();     
+              // }
+            // );
+          // }
         }
         return Container();
       },
@@ -158,102 +183,186 @@ class TriviaStatusPage extends StatelessWidget {
   }
 
   Widget _questionsStatusList() {
+    UserPreferences prefs = UserPreferences();
+    print(prefs.id);
+
+    List<String> triviaQuestions = mTrivia.questions;
+
     return StreamBuilder(
-      stream: activeTriviaBloc.activeTriviaQuestionsStream,
-      builder: (context, snapshot) {
+      stream: webDataBloc.webDataStream,
+      builder: (context, webSnapshot) {
+        if (webSnapshot.hasData) {
+          WebData webData = WebData.fromDocument(webSnapshot.data.documents.first);
 
-        if (snapshot.hasData) {
-          QuerySnapshot response = snapshot.data;
-          DocumentSnapshot document = response.documents.first;
-
-          final data = document.data;
-          List<dynamic> questions = data["questions"];
-          
-          return StreamBuilder<DocumentSnapshot>(
-            stream: activeTriviaBloc.userTriviaAnswersStream,
-            builder: (context, snapshot) {
-
-              if (snapshot.hasData) {
-                UserTriviaAnswers userTriviaAnswers = UserTriviaAnswers.fromDocument(snapshot.data.data);                
-                UserAnswer userAnswer = searchTriviaNameData(userTriviaAnswers);
+          return StreamBuilder(
+            stream: userSummaryBloc.userSummaryStream,
+            builder: (context, summarySnapshot) {
+              if (summarySnapshot.hasData) {
+                UserSummary auxSummary = UserSummary.fromDocumentList(summarySnapshot.data.documents);
+                UserSummary ownUserSummary = auxSummary.getOwnUserSummary();
 
                 return SingleChildScrollView(
                   child: Column(
-                    children: List.generate(questions.length, (index) {
-                    
-                        Map<String, dynamic> auxMap = Map<String, dynamic>.from(questions[index]);
+                    children: List.generate(
+                      triviaQuestions.length, 
+                      (index) {
+                        final String question = triviaQuestions[index];
 
-                        if (auxMap["isActive"] == true) {
-                          if (userAnswer.responses[auxMap["name"]] == null || userAnswer.responses[auxMap["name"]].length > 0) {
-                            if (userAnswer.responses[auxMap["name"]] == mTrivia.respCorrect["question$index"]) {
-                              return QuestionStatusButton.correct(
-                                  mPointsNumber:  double.parse((mTrivia.points / mTrivia.questions.length).toStringAsFixed(1)), 
-                                  mQuestionNumber: index + 1, 
-                                  mOnPressed: () {}
-                                );
-                              }
-                              return QuestionStatusButton.incorrect(
-                                mPointsNumber: 0, 
-                                mQuestionNumber: index + 1, 
-                                mOnPressed: () {}
-                              );
-                          }
-                          return QuestionStatusButton.ready(
-                            mPointsNumber: double.parse((mTrivia.points / mTrivia.questions.length).toStringAsFixed(1)), 
+                        if (ownUserSummary.notAnsweredQuestions.contains(question)) {
+                          return QuestionStatusButton.notAnswered(
                             mQuestionNumber: index + 1, 
-                            mOnPressed: () {
-                            SelectedAnswerBloc bloc = SelectedAnswerBloc()
-                              ..changeUserAnswer(userAnswer)
-                              ..changeQuestion(auxMap["name"])
-                              ..changeParentTrivia(mTrivia);
+                            mOnPressed: () {}
+                          );
+                        }              
 
-                              _selectQuestion(auxMap["name"], index);
-                              _goToQuestion(context);
-                            }
+                        if (ownUserSummary.correctAnswers.contains(question)) {
+                          return QuestionStatusButton.correct(
+                            mPointsNumber:  double.parse((mTrivia.points / mTrivia.questions.length).toStringAsFixed(1)), 
+                            mQuestionNumber: index + 1, 
+                            mOnPressed: () {}
                           );
                         }
 
-                        if (auxMap["wasPlayed"]) {
-                          if (userAnswer.responses[auxMap["name"]] == mTrivia.respCorrect["question$index"]) {
-                            return QuestionStatusButton.correct(
-                              mPointsNumber: double.parse((mTrivia.points / mTrivia.questions.length).toStringAsFixed(1)), 
-                              mQuestionNumber: index + 1, 
-                              mOnPressed: () {}
-                            );
-                          }
-                          if (userAnswer.responses[auxMap["name"]] == "" || userAnswer.responses[auxMap["name"]] == "No respondido") {
-                            return QuestionStatusButton.notAnswered(
-                              mQuestionNumber: index + 1, 
-                              mOnPressed: () {}
-                            );
-                          }
+                        if (ownUserSummary.wrongQuestions.contains(question)) {
                           return QuestionStatusButton.incorrect(
                             mPointsNumber: 0, 
                             mQuestionNumber: index + 1, 
                             mOnPressed: () {}
                           );
-                        } 
-                        
+                        }
+
+                        if (webData.activeQuestions.contains(question)) {
+                          return QuestionStatusButton.ready(
+                            mPointsNumber: double.parse((mTrivia.points / mTrivia.questions.length).toStringAsFixed(1)), 
+                            mQuestionNumber: index + 1, 
+                            mOnPressed: () {
+                            SelectedAnswerBloc bloc = SelectedAnswerBloc()
+                              // ..changeUserAnswer(userAnswer)
+                              ..changeQuestion(question)
+                              ..changeParentTrivia(mTrivia);
+//      
+                              _selectQuestion(question, index);
+                              _goToQuestion(context);
+                            }
+                          );
+                        }
+
                         return QuestionStatusButton.waiting(
                           mPointsNumber: double.parse((mTrivia.points / mTrivia.questions.length).toStringAsFixed(1)), 
                           mQuestionNumber: index + 1, 
                           mOnPressed: () {}
                         );
                       }
-                    ),
+                    )
                   )
                 );
               }
               return Container();
-              
-            }
+            },
           );
+          // return StreamBuilder(
+            // stream: ,
+          // );
         }
-
         return Container();
-
       },
     );
+
+    return Container();
+    // return StreamBuilder(
+    //   stream: activeTriviaBloc.activeTriviaQuestionsStream,
+    //   builder: (context, snapshot) {
+
+    //     if (snapshot.hasData) {
+    //       QuerySnapshot response = snapshot.data;
+    //       DocumentSnapshot document = response.documents.first;
+
+    //       final data = document.data;
+    //       List<dynamic> questions = data["questions"];
+          
+    //       return StreamBuilder<DocumentSnapshot>(
+    //         stream: activeTriviaBloc.userTriviaAnswersStream,
+    //         builder: (context, snapshot) {
+
+    //           if (snapshot.hasData) {
+    //             UserTriviaAnswers userTriviaAnswers = UserTriviaAnswers.fromDocument(snapshot.data.data);                
+    //             UserAnswer userAnswer = searchTriviaNameData(userTriviaAnswers);
+
+    //             return SingleChildScrollView(
+    //               child: Column(
+    //                 children: List.generate(questions.length, (index) {
+                    
+    //                     Map<String, dynamic> auxMap = Map<String, dynamic>.from(questions[index]);
+
+    //                     if (auxMap["isActive"] == true) {
+    //                       if (userAnswer.responses[auxMap["name"]] == null || userAnswer.responses[auxMap["name"]].length > 0) {
+    //                         if (userAnswer.responses[auxMap["name"]] == mTrivia.respCorrect["question$index"]) {
+    //                           return QuestionStatusButton.correct(
+    //                               mPointsNumber:  double.parse((mTrivia.points / mTrivia.questions.length).toStringAsFixed(1)), 
+    //                               mQuestionNumber: index + 1, 
+    //                               mOnPressed: () {}
+    //                             );
+    //                           }
+    //                           return QuestionStatusButton.incorrect(
+    //                             mPointsNumber: 0, 
+    //                             mQuestionNumber: index + 1, 
+    //                             mOnPressed: () {}
+    //                           );
+    //                       }
+    //                       return QuestionStatusButton.ready(
+    //                         mPointsNumber: double.parse((mTrivia.points / mTrivia.questions.length).toStringAsFixed(1)), 
+    //                         mQuestionNumber: index + 1, 
+    //                         mOnPressed: () {
+    //                         SelectedAnswerBloc bloc = SelectedAnswerBloc()
+    //                           ..changeUserAnswer(userAnswer)
+    //                           ..changeQuestion(auxMap["name"])
+    //                           ..changeParentTrivia(mTrivia);
+
+    //                           _selectQuestion(auxMap["name"], index);
+    //                           _goToQuestion(context);
+    //                         }
+    //                       );
+    //                     }
+
+    //                     if (auxMap["wasPlayed"]) {
+    //                       if (userAnswer.responses[auxMap["name"]] == mTrivia.respCorrect["question$index"]) {
+    //                         return QuestionStatusButton.correct(
+    //                           mPointsNumber: double.parse((mTrivia.points / mTrivia.questions.length).toStringAsFixed(1)), 
+    //                           mQuestionNumber: index + 1, 
+    //                           mOnPressed: () {}
+    //                         );
+    //                       }
+    //                       if (userAnswer.responses[auxMap["name"]] == "" || userAnswer.responses[auxMap["name"]] == "No respondido") {
+    //                         return QuestionStatusButton.notAnswered(
+    //                           mQuestionNumber: index + 1, 
+    //                           mOnPressed: () {}
+    //                         );
+    //                       }
+    //                       return QuestionStatusButton.incorrect(
+    //                         mPointsNumber: 0, 
+    //                         mQuestionNumber: index + 1, 
+    //                         mOnPressed: () {}
+    //                       );
+    //                     } 
+                        
+    //                     return QuestionStatusButton.waiting(
+    //                       mPointsNumber: double.parse((mTrivia.points / mTrivia.questions.length).toStringAsFixed(1)), 
+    //                       mQuestionNumber: index + 1, 
+    //                       mOnPressed: () {}
+    //                     );
+    //                   }
+    //                 ),
+    //               )
+    //             );
+    //           }
+    //           return Container();
+              
+    //         }
+    //       );
+    //     }
+    //     return Container();
+    //   },
+    // );
   }
 
   UserAnswer searchTriviaNameData(UserTriviaAnswers mUserTriviaAnswers) {

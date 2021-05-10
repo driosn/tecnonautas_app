@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:tecnonautas_app/core/bloc/active_trivia/active_trivia_bloc.dart';
+import 'package:tecnonautas_app/core/bloc/user_summary/user_summary_bloc.dart';
 import 'package:tecnonautas_app/core/bloc/user_trivia_ranking/user_trivia_ranking_bloc.dart';
+import 'package:tecnonautas_app/core/models/user_summary.dart';
 import 'package:tecnonautas_app/src/resources/app_colors.dart';
 import 'package:tecnonautas_app/src/utils/user_preferences.dart';
 import 'package:tecnonautas_app/src/widgets/card_container.dart';
@@ -11,7 +13,7 @@ class AvatarTriviaInfo extends StatelessWidget {
   
   final String mTriviaId;
 
-  final int finalScore;
+  final double finalScore;
   final int avatarRanking;
   final int totalPlayers;
 
@@ -82,25 +84,11 @@ class AvatarTriviaInfo extends StatelessWidget {
           fontWeight: FontWeight.normal
         )),
         SizedBox(width: _wordSpace),
-        StreamBuilder<DocumentSnapshot>(
-          stream: Firestore.instance
-                           .collection("userTriviaRanking")
-                           .document(mTriviaId)
-                           .snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              DocumentSnapshot snapshotResponse = snapshot.data;
-              Map<String, dynamic> ownProfileData = Map<String, dynamic>();
-
-              ownProfileData = snapshotResponse.data["ranking"].firstWhere((element) => element["userId"] == prefs.id);
-
-              return Text(ownProfileData["points"].toStringAsFixed(2), style: Theme.of(context).textTheme.subtitle2.copyWith(
-                color: Colors.black45, fontWeight: FontWeight.normal
-              ));
-            }
-            return Container();
-          },
-        )
+        Text(
+          this.finalScore.toStringAsFixed(2),
+          style: Theme.of(context).textTheme.subtitle2.copyWith(
+          color: Colors.black45, fontWeight: FontWeight.normal
+        ))
       ],
     );
   }
@@ -108,37 +96,42 @@ class AvatarTriviaInfo extends StatelessWidget {
   Widget _rankingLabel(BuildContext context) {
     final double _wordSpace = 5;
 
+  
+
     return Row(
       children: <Widget>[
         Text('Ranking: ', style: Theme.of(context).textTheme.subtitle2.copyWith(
           fontWeight: FontWeight.normal
         )),
         SizedBox(width: _wordSpace),
-        StreamBuilder<DocumentSnapshot>(
-          stream: Firestore.instance
-                           .collection("userTriviaRanking")
-                           .document(mTriviaId)
-                           .snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              DocumentSnapshot snapshotResponse = snapshot.data;
-              List<Map<String, dynamic>> usersInThisTrivia = List<Map<String, dynamic>>();
+        Text('$avatarRanking de $totalPlayers', style: Theme.of(context).textTheme.subtitle2.copyWith(
+          color: Colors.black45, fontWeight: FontWeight.normal
+        ))
+        // StreamBuilder<DocumentSnapshot>(
+        //   stream: Firestore.instance
+        //                    .collection("userTriviaRanking")
+        //                    .document(mTriviaId)
+        //                    .snapshots(),
+        //   builder: (context, snapshot) {
+        //     if (snapshot.hasData) {
+        //       DocumentSnapshot snapshotResponse = snapshot.data;
+        //       List<Map<String, dynamic>> usersInThisTrivia = List<Map<String, dynamic>>();
 
-              snapshotResponse.data["ranking"].forEach((user) {
-                usersInThisTrivia.add(Map<String, dynamic>.from(user));
-              });
+        //       snapshotResponse.data["ranking"].forEach((user) {
+        //         usersInThisTrivia.add(Map<String, dynamic>.from(user));
+        //       });
               
-              usersInThisTrivia.sort((userA, userB) => userB["points"].compareTo(userA["points"]));
-              int userPosition = usersInThisTrivia.indexWhere((element) => element["userId"] == prefs.id);
-              userPosition++;
+        //       usersInThisTrivia.sort((userA, userB) => userB["points"].compareTo(userA["points"]));
+        //       int userPosition = usersInThisTrivia.indexWhere((element) => element["userId"] == prefs.id);
+        //       userPosition++;
 
-              return Text('$userPosition de ${snapshotResponse.data["ranking"].length}', style: Theme.of(context).textTheme.subtitle2.copyWith(
-                color: Colors.black45, fontWeight: FontWeight.normal
-              ));
-            }
-            return Container();
-          },
-        )
+        //       return Text('$userPosition de ${snapshotResponse.data["ranking"].length}', style: Theme.of(context).textTheme.subtitle2.copyWith(
+        //         color: Colors.black45, fontWeight: FontWeight.normal
+        //       ));
+        //     }
+        //     return Container();
+        //   },
+        // )
       ],
     );
   }

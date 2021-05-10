@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tecnonautas_app/src/utils/user_preferences.dart';
+import 'package:tecnonautas_app/src/utils/utils.dart';
+import 'package:tecnonautas_app/src/utils/validators.dart';
 
-class EditProfileBloc {
+class EditProfileBloc with Validators {
 
   UserPreferences prefs = UserPreferences();
 
@@ -16,10 +18,10 @@ class EditProfileBloc {
 
   // Streams
   Stream<String> get avatarStream => _avatarController.stream;
-  Stream<String> get nameStream => _nameController.stream;
-  Stream<String> get lastnameStream => _lastnameController.stream;
+  Stream<String> get nameStream => _nameController.stream.transform(validateEmptyString);
+  Stream<String> get lastnameStream => _lastnameController.stream.transform(validateEmptyString);
   Stream<String> get birthdateStream => _birthdateController.stream;
-  Stream<String> get cityStream => _cityController.stream;
+  Stream<String> get cityStream => _cityController.stream.transform(validateEmptyString);
   Stream<int> get phoneStream => _phoneController.stream;
 
   // Inputs
@@ -38,8 +40,17 @@ class EditProfileBloc {
   String get city => _cityController.value;
   int get phone => _phoneController.value;
 
+  Stream<bool> get correctFormDataStream => Rx.combineLatest5(
+    nameStream, 
+    lastnameStream,
+    birthdateStream, 
+    cityStream,
+    phoneStream,
+    (a, b, c, d, e) => true
+  );
+
   Future<bool> updateProfile() async {
-    await Firestore.instance.collection("users").document(prefs.id).updateData({
+    await Firestore.instance.collection("user").document(prefs.id).updateData({
       "avatar" : this.avatar,
       "name" : this.name,
       "lastname" : this.lastname,
@@ -55,6 +66,28 @@ class EditProfileBloc {
     prefs.updateCity(this.city);
     prefs.updatePhone(this.phone.toString());
 
+    return true;
+  }
+
+  Future<void> editProfile() async {
+    Utils _utils = Utils();
+    UserPreferences prefs = UserPreferences();
+    if (_stringNotHasNumber(name) && _stringNotHasNumber(lastname)) {
+      if ((this.phone.toString().length == 8 || this.phone.toString().length == 7) && _utils.isNumeric(this.phone.toString())) {
+        await updateProfile();  
+      } else {
+        throw new Exception("El numero de celular debe ser correcto");
+      }
+    } else {
+      throw new Exception("El nombre y apellido no deben contener números");
+    }
+  }
+
+  bool _stringNotHasNumber(String mValue) {
+    for(int i = 0; i < mValue.length; i++) {
+      int charCode = mValue.codeUnitAt(i);
+      if (charCode >= 48 && charCode <= 57) return false;
+    }
     return true;
   }
 

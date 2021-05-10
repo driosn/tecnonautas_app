@@ -3,6 +3,10 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:tecnonautas_app/src/pages/auth/auth_page.dart';
 import 'package:tecnonautas_app/src/pages/edit_profile/edit_profile_page.dart';
 import 'package:tecnonautas_app/src/pages/home/trivias_page.dart';
+import 'package:tecnonautas_app/src/pages/info_pages/about_us_page.dart';
+import 'package:tecnonautas_app/src/pages/info_pages/change_password_page.dart';
+import 'package:tecnonautas_app/src/pages/info_pages/contact_us_page.dart';
+import 'package:tecnonautas_app/src/pages/info_pages/frequent_questions_page.dart';
 import 'package:tecnonautas_app/src/resources/app_colors.dart';
 import 'package:tecnonautas_app/src/utils/user_preferences.dart';
 import 'package:tecnonautas_app/src/widgets/custom_plain_appbar.dart';
@@ -51,13 +55,13 @@ class SettingsPage extends StatelessWidget {
         Navigator.push(context, MaterialPageRoute(builder: (context) => EditProfilePage()));
       }),
 
-      SettingsItem(FontAwesomeIcons.lock, 'Cambiar contraseña', () {}),
+      SettingsItem(FontAwesomeIcons.lock, 'Cambiar contraseña', () => _goToSelectedPage(context, ChangePasswordPage())),
 
-      SettingsItem(FontAwesomeIcons.questionCircle, 'Preguntas Frecuentes', () {}),
+      SettingsItem(FontAwesomeIcons.questionCircle, 'Preguntas Frecuentes', () => _goToSelectedPage(context, FrequentQuestionsPage())),
 
-      SettingsItem(FontAwesomeIcons.mailBulk, 'Contáctanos', () {}),
+      SettingsItem(FontAwesomeIcons.mailBulk, 'Contáctanos', () => _goToSelectedPage(context, ContactUsPage())),
 
-      SettingsItem(FontAwesomeIcons.plus, '¿Quiénes somos?', () {}),
+      SettingsItem(FontAwesomeIcons.plus, '¿Quiénes somos?', () => _goToSelectedPage(context, AboutUsPage())),
 
       SettingsItem(FontAwesomeIcons.windowClose, 'Salir', () {
         UserPreferences prefs = UserPreferences();

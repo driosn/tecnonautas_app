@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tecnonautas_app/src/pages/portal_home/portal_home_page.dart';
 import 'package:tecnonautas_app/src/resources/app_colors.dart';
 import 'package:tecnonautas_app/src/widgets/gradient_button.dart';
 import 'package:tecnonautas_app/src/widgets/gradient_container.dart';
@@ -75,7 +76,12 @@ class LeaveTriviaDialog extends StatelessWidget {
   }
 
   void _leaveTrivia(BuildContext context) {
-    Navigator.pushReplacementNamed(context, '/');
+    Navigator.pushAndRemoveUntil(
+      context, 
+      MaterialPageRoute(
+        builder: (context) => PortalHomePage()
+      ), (route) => false
+    );
   }
 }
 
