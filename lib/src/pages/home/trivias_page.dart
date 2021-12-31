@@ -189,11 +189,31 @@ class _TriviasPageState extends State<TriviasPage> {
                                         )
                                       );
                                     });
-            
-                                    return Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: triviaListSectionList,
-                                    );
+
+
+
+                                    return triviaListSectionList.isNotEmpty
+                                      ? Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: triviaListSectionList,
+                                        )
+                                      : Container(
+                                          margin: EdgeInsets.only(
+                                            top: 10.0,
+                                            bottom: 32.0,
+                                          ),
+                                          child: Align(
+                                            alignment: Alignment.center,
+                                            child: Text(
+                                              'No existen trivias que coincidan con la busqueda',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16
+                                              ),
+                                            ),
+                                          ),
+                                        );
                                   }
             
                                   return Center(

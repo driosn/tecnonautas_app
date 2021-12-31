@@ -166,7 +166,7 @@ class _TriviaStatusSection extends StatelessWidget {
                 });
 
                 User ownUser = allUsers.firstWhere((user) => user.id == prefs.id);
-                return _rankingContent(context, "${ownUser.score.toStringAsFixed(0)}", accent);
+                return _rankingContent(context, "${ownUser.score.toString()}", accent);
               }
 
               return _rankingContent(context, "0", accent);

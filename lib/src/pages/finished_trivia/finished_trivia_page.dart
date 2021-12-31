@@ -64,7 +64,11 @@ class _FinishedTriviaPageState extends State<FinishedTriviaPage> {
                   padding: EdgeInsets.all(_pagePadding),
                   child: Column(
                     children: <Widget>[
-                      _TitleCard(title: selectedAnswerBloc.parentTrivia.name),
+                      _TitleCard(
+                        title: selectedAnswerBloc.parentTrivia.name,
+                        // isFavorite: selectedAnswerBloc.parentTrivia.fav,
+                        isFavorite: false,
+                      ),
                       SizedBox(height: _spacingValue),
                       StreamBuilder(
                         stream: userSummaryBloc.userSummaryStream,
@@ -234,8 +238,12 @@ Widget _questionsStatusList() {
 class _TitleCard extends StatelessWidget {
   
   final String title;
+  final bool isFavorite;
 
-  _TitleCard({@required this.title});
+  _TitleCard({
+    @required this.title,
+    @required this.isFavorite
+  });
 
   final double _cardPadding = 10;
   final double _positionSpace = 10;
@@ -267,7 +275,7 @@ class _TitleCard extends StatelessWidget {
           right: _positionSpace,
           top: _positionSpace,
           child: FavoriteButton(
-            isFavorite: true, 
+            isFavorite: this.isFavorite, 
             onPressed: _checkFavorite
           ),
         )

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:password/password.dart';
 import 'package:rxdart/rxdart.dart';
@@ -26,6 +27,7 @@ class RegisterBloc with Validators {
   BehaviorSubject<String> _lastnameController = BehaviorSubject<String>();
   BehaviorSubject<String> _nicknameController = BehaviorSubject<String>();
   BehaviorSubject<String> _birthdateController = BehaviorSubject<String>();
+  BehaviorSubject<String> _emailController = BehaviorSubject<String>();
   BehaviorSubject<String> _phoneController = BehaviorSubject<String>();
   BehaviorSubject<String> _gradeController = BehaviorSubject<String>();
   BehaviorSubject<String> _avatarController = BehaviorSubject<String>();
@@ -39,6 +41,7 @@ class RegisterBloc with Validators {
   Stream<String> get lastnameStream => _lastnameController.stream.transform(validateEmptyString);
   Stream<String> get nicknameStream => _nicknameController.stream.transform(validateEmptyString);
   Stream<String> get birthdateStream => _birthdateController.stream;
+  Stream<String> get emailStream => _emailController.stream.transform(validateEmptyString);
   Stream<String> get phoneStream => _phoneController.stream.transform(validateEmptyString);
   Stream<String> get gradeStream => _gradeController.stream.transform(validateEmptyString);
   Stream<String> get avatarStream => _avatarController.stream;
@@ -52,6 +55,7 @@ class RegisterBloc with Validators {
   Function(String) get changeLastname => _lastnameController.sink.add;
   Function(String) get changeNickname => _nicknameController.sink.add;
   Function(String) get changeBirthdate => _birthdateController.sink.add;
+  Function(String) get changeEmail => _emailController.sink.add;
   Function(String) get changePhone => _phoneController.sink.add;
   Function(String) get changeGrade => _gradeController.sink.add;
   Function(String) get changeAvatar => _avatarController.sink.add;
@@ -66,6 +70,7 @@ class RegisterBloc with Validators {
   String get nickname => _nicknameController.value;
   String get birthdate => _birthdateController.value;
   String get phone => _phoneController.value;
+  String get email => _emailController.value;
   String get grade => _gradeController.value;
   String get avatar => _avatarController.value;
   String get city => _cityController.value;
@@ -99,7 +104,13 @@ class RegisterBloc with Validators {
   }
 
   Future<void> createNewUser() async {
-      String uniqueId = _uuid.v1();
+      AuthResult authResult = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: this.email,
+        password: this.password
+      );
+
+      String uniqueId = authResult.user.providerId;
+      print("Unique Id : $uniqueId");
 
       if (confirmPassword == password) {
         if (_stringNotHasNumber(name) && _stringNotHasNumber(lastname)) {
@@ -114,6 +125,7 @@ class RegisterBloc with Validators {
                   "lastname" : this.lastname,
                   "username" : this.nickname,
                   "birthdate" : this.birthdate,
+                  "email": this.email,
                   "phone" : this.phone,
                   "grade" : this.grade,
                   "avatar" : this.avatar,

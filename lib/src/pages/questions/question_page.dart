@@ -120,7 +120,11 @@ class _QuestionPageState extends State<QuestionPage> {
           if (selectedAnswerBloc.selectedAnswer == "") {
             // selectedAnswerBloc.changeSelectedAnswer("No respondido");
             userSummaryBloc.postNotAnswered(mQuestion.questionLbl);
+
           } else if (selectedAnswerBloc.selectedAnswer == mQuestion.respCorrect) {
+            print("RESPUESTA CORRECTA");
+
+            // Inside this method we update score.
             userSummaryBloc.postCorrectAnswer(mQuestion.questionLbl); 
           } else if (selectedAnswerBloc.selectedAnswer != mQuestion.respCorrect) {
             userSummaryBloc.postWrongAnswer(mQuestion.questionLbl);

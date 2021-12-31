@@ -94,7 +94,9 @@ class _SearchInputIcon extends StatelessWidget {
           child: Icon(mIcon, size: 30, color: Colors.white),
         ),
       ),
-      onTap: () {},
+      onTap: () {
+        
+      },
     );
   }
 }

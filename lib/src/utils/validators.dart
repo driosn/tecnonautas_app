@@ -31,6 +31,12 @@ class Validators {
     return null;
   }
 
+  static String emailValidator(String mEmail) {
+    bool emailValid = RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(mEmail);
+    if (emailValid) return null;
+    return "El email no es valido"; 
+  }
+
   static String phoneValidator(String mPhone) {
     if (mPhone.isEmpty) return emptyLbl;
     if (!Utils().isNumeric(mPhone) || mPhone.length < 8) return "El celular debe ser un número de 8 digitos";

@@ -90,6 +90,14 @@ class SelectedAnswerBloc {
     });
   }
 
+  void addCorrectScore() async {
+    final userReference = await Firestore.instance.collection("user").document(prefs.id).get();
+    final currentScore = userReference.data["score"];
+    userReference.reference.updateData({
+      "score": currentScore + parentTrivia.points ~/ parentTrivia.questions.length
+    });
+  }
+
   void updateSelectedAnswerLocal({String mCorrectAnswer}) {
     // double valuePerQuestion = (this.parentTrivia.points / this.parentTrivia.qtyPreg);
     UserPreferences prefs = UserPreferences();

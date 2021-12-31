@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:tecnonautas_app/core/bloc/selected_answer/selected_answer_bloc.dart';
 import 'package:tecnonautas_app/core/models/user_summary.dart';
 import 'package:tecnonautas_app/core/models/web_data.dart';
 import 'package:tecnonautas_app/src/utils/user_preferences.dart';
@@ -24,6 +25,7 @@ class UserSummaryBloc {
   postCorrectAnswer(String mQuestionLbl) async {
     UserSummary summary = await fetchUserSummary();
     if (!summary.correctAnswers.contains(mQuestionLbl)) {
+      selectedAnswerBloc.addCorrectScore();
       summary.correctAnswers.add(mQuestionLbl);
       summary.reference.updateData({ "correctAnswers" : summary.correctAnswers });
     }

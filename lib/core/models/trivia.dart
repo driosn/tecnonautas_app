@@ -68,9 +68,9 @@ class Trivia {
   static Map<String, Map<String, String>> _generateResponsesMap(Map<String, dynamic> responses, int length) {
     Map<String, Map<String, String>> auxiliarMap = Map<String, Map<String, String>>();
 
-    for(int i = 0; i < length; i++) {
-      auxiliarMap.putIfAbsent("question$i", () => Map<String, String>.from(responses["question$i"]));  
-    }
+    responses.forEach((key, value) {
+      auxiliarMap.putIfAbsent(key, () => Map<String, String>.from(value));
+    });
 
     return auxiliarMap;
   }

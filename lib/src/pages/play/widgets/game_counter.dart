@@ -56,6 +56,11 @@ class _GameCounterState extends State<GameCounter> {
         ),
     );
   }
+
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
   
   @override
   Widget build(BuildContext context) {

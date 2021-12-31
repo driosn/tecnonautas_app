@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:password/password.dart';
 import 'package:tecnonautas_app/core/bloc/auth/auth_bloc.dart';
 import 'package:tecnonautas_app/core/bloc/login/login_bloc.dart';
@@ -66,6 +67,15 @@ class _RegisterState extends State<Register> {
   TextEditingController _passwordController = TextEditingController();
   TextEditingController _rePasswordController = TextEditingController();
 
+  final _nombreFocus = FocusNode();
+  final _apellidoFocus = FocusNode();
+  final _usuarioFocus = FocusNode();
+  final _contrasenaFocus = FocusNode();
+  final _confirContrasenaFocus = FocusNode();
+  final _emailfocus = FocusNode();
+  final _celularFocus = FocusNode();
+  final _cursoFocus = FocusNode();
+
   final double mTextSize = 16;
 
   @override
@@ -123,58 +133,138 @@ class _RegisterState extends State<Register> {
                         ),
                       ),
 
-                      SizedBox(height: 24),
+                      const SizedBox(height: 24),
 
                       TextFormField(
+                        focusNode: _nombreFocus,
                         decoration: InputDecoration(
-                          labelStyle: TextStyle(color: Colors.white),
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           labelText: 'Nombre',
+                          labelStyle: TextStyle(
+                            color: accent
+                          )
                         ),
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.normal, fontSize: mTextSize),
+                        style: TextStyle(
+                          color: accent, 
+                          fontWeight: FontWeight.normal, 
+                          fontSize: mTextSize
+                        ),
                         validator: Validators.nameValidator,
-                        onChanged: registerBloc.changeName
+                        onChanged: registerBloc.changeName,
+                        onEditingComplete: () {
+                          _apellidoFocus.requestFocus();
+                        },
                       ),
 
+                      const SizedBox(height: 12),
+
                       TextFormField(
+                        focusNode: _apellidoFocus,
                         decoration: InputDecoration(
-                          labelStyle: TextStyle(color: Colors.white),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12)
+                          ),
+                          filled: true,
+                          fillColor: Colors.white,
                           labelText: 'Apellido',
+                          labelStyle: TextStyle(
+                            color: accent
+                          )
                         ),
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.normal, fontSize: mTextSize),
+                        style: TextStyle(
+                          color: accent, 
+                          fontWeight: FontWeight.normal, 
+                          fontSize: mTextSize
+                        ),
                         validator: Validators.nameValidator,
-                        onChanged: registerBloc.changeLastname
+                        onChanged: registerBloc.changeLastname,
+                        onEditingComplete: () {
+                          _usuarioFocus.requestFocus();
+                        },
                       ),
 
+                      const SizedBox(height: 12),
+
                       TextFormField(
+                        focusNode: _usuarioFocus,
                         decoration: InputDecoration(
-                          labelStyle: TextStyle(color: Colors.white),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12)
+                          ),
+                          filled: true,
+                          fillColor: Colors.white,
                           labelText: 'Nombre de usuario',
+                          labelStyle: TextStyle(
+                            color: accent
+                          )
                         ),
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.normal, fontSize: mTextSize),
+                        style: TextStyle(
+                          color: accent, 
+                          fontWeight: FontWeight.normal, 
+                          fontSize: mTextSize
+                        ),
                         validator: Validators.nameValidator,
-                        onChanged: registerBloc.changeNickname
+                        onChanged: registerBloc.changeNickname,
+                        onEditingComplete: () {
+                          _contrasenaFocus.requestFocus();
+                        },
                       ),
 
+                      const SizedBox(height: 12),
+
                       TextFormField(
+                        focusNode: _contrasenaFocus,
                         controller: _passwordController,
                         decoration: InputDecoration(
-                          labelStyle: TextStyle(color: Colors.white),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12)
+                          ),
+                          fillColor: Colors.white,
+                          filled: true,
                           labelText: 'Contraseña',
+                          labelStyle: TextStyle(
+                            color: accent
+                          )
                         ),
                         obscureText: true,
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.normal, fontSize: mTextSize),
+                        style: TextStyle(
+                          color: accent, 
+                          fontWeight: FontWeight.normal, 
+                          fontSize: mTextSize
+                        ),
                         validator: Validators.passwordValidator,
-                        onChanged: registerBloc.changePassword
+                        onChanged: registerBloc.changePassword,
+                        onEditingComplete: () {
+                          _confirContrasenaFocus.requestFocus();
+                        },
                       ),
 
+                      const SizedBox(height: 12),
+
                       TextFormField(
+                        focusNode: _confirContrasenaFocus,
                         controller: _rePasswordController,
                         decoration: InputDecoration(
-                          labelStyle: TextStyle(color: Colors.white),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12)
+                          ),
+                          filled: true,
+                          fillColor: Colors.white,
                           labelText: 'Confirmar contraseña',
+                          labelStyle: TextStyle(
+                            color: accent
+                          )
                         ),
                         obscureText: true,
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.normal, fontSize: mTextSize),
+                        style: TextStyle(
+                          color: accent,
+                          fontWeight: FontWeight.normal, 
+                          fontSize: mTextSize,
+                        ),
                         validator: (rePassword) {
                           if (Validators.passwordValidator(rePassword) != null) {
                             return Validators.passwordValidator(rePassword);
@@ -187,16 +277,56 @@ class _RegisterState extends State<Register> {
                             return "Las contraseñas no coinciden";
                           }
                         },
-                        onChanged: registerBloc.changeConfirmPassword
+                        onChanged: registerBloc.changeConfirmPassword,
+                        onEditingComplete: () async {
+                          final dateTime = await showDatePicker(
+                            locale: Locale('es', 'ES'),
+                            context: context, 
+                            initialDate: registerBloc.birthdate != null && registerBloc.birthdate != ""
+                                         ? DateTime.parse(registerBloc.birthdate)
+                                         : DateTime.now(), 
+                            firstDate: DateTime(1920), 
+                            lastDate: DateTime.now()
+                          );
+                       
+                          if (dateTime != null) {
+                            registerBloc.changeBirthdate(dateTime.toString());
+                            _birthdateController.text = parseBirthday(dateTime);
+                            _emailfocus.requestFocus();
+                          }
+                        },
                       ),
 
-                      TextField(
-                        controller: _birthdateController,
-                        decoration: InputDecoration(
-                          labelStyle: TextStyle(color: Colors.white),
-                          labelText: 'Fecha de Nacimiento'
+                      const SizedBox(height: 12),
+
+                      GestureDetector(
+                        child: StreamBuilder(
+                          stream: registerBloc.birthdateStream,
+                          builder: (context, snapshot) {
+                              return Container(
+                                padding: EdgeInsets.only(left: 14),
+                                height: 52,
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12)
+                                ),
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                  snapshot.hasData
+                                    ? parseBirthday(DateTime.parse(snapshot.data))
+                                    : 'Fecha de Nacimiento',
+                                    style: TextStyle(
+                                      color: accent,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold
+                                    ),
+                                  ),
+                                ),
+                              );
+                          }
                         ),
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.normal, fontSize: mTextSize),
                         onTap: () async {
                           final dateTime = await showDatePicker(
                             locale: Locale('es', 'ES'),
@@ -211,25 +341,70 @@ class _RegisterState extends State<Register> {
                           if (dateTime != null) {
                             registerBloc.changeBirthdate(dateTime.toString());
                             _birthdateController.text = parseBirthday(dateTime);
+                            _emailfocus.requestFocus();
                           }
                         },
                       ),
 
+                      TextFormField(
+                        focusNode: _emailfocus,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12)
+                          ),
+                          filled: true,
+                          fillColor: Colors.white,
+                          labelText: 'Email',
+                          labelStyle: TextStyle(
+                            color: accent
+                          )
+                        ),
+                        style: TextStyle(
+                          color: accent,
+                          fontWeight: FontWeight.normal, 
+                          fontSize: mTextSize
+                        ),
+                        validator: Validators.emailValidator,
+                        onChanged: registerBloc.changePhone,
+                        keyboardType: TextInputType.emailAddress,
+                        onEditingComplete: () {
+                          _celularFocus.requestFocus();
+                        },
+                      ),
+
+
+                      const SizedBox(height: 12),
                       
                       TextFormField(
+                        focusNode: _celularFocus,
                         decoration: InputDecoration(
-                          labelStyle: TextStyle(color: Colors.white),
-                          labelText: 'Celular'
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12)
+                          ),
+                          filled: true,
+                          fillColor: Colors.white,
+                          labelText: 'Celular',
+                          labelStyle: TextStyle(
+                            color: accent
+                          )
                         ),
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.normal, fontSize: mTextSize),
+                        style: TextStyle(
+                          color: accent,
+                          fontWeight: FontWeight.normal, 
+                          fontSize: mTextSize
+                        ),
                         validator: Validators.phoneValidator,
-                        onChanged: registerBloc.changePhone,
+                        onChanged: registerBloc.changeEmail,
                         keyboardType: TextInputType.numberWithOptions(signed: false, decimal: false),
+                        onEditingComplete: () {
+                          _cursoFocus.requestFocus();
+                        },
                       ),
                       
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
 
                       DropdownButton(
+                        focusNode: _cursoFocus,
                         dropdownColor: accent,
                         value: _selectedGrade,
                         hint: Text("Seleccionar curso", style: TextStyle(color: Colors.white, fontSize: 16)),

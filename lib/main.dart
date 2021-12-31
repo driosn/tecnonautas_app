@@ -5,6 +5,7 @@ import 'package:tecnonautas_app/src/pages/init/init_page.dart';
 import 'package:tecnonautas_app/src/pages/splash_screen/splash_screen_page.dart';
 import 'package:tecnonautas_app/src/providers/portal_home_model.dart';
 import 'package:tecnonautas_app/src/providers/push_notifications_provider.dart';
+import 'package:tecnonautas_app/src/resources/app_colors.dart';
 import 'package:tecnonautas_app/src/router/router.dart';
 import 'package:tecnonautas_app/src/utils/user_preferences.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -75,7 +76,7 @@ class _MyAppState extends State<MyApp> {
               fontSize: 12,
               fontWeight: FontWeight.bold
             ) 
-          )
+          ),
         ),
         // home: SplashScreenPage()
         home: SplashScreenPage()

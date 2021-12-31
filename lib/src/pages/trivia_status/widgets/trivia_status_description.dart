@@ -45,7 +45,11 @@ class TriviaStatusDescription extends StatelessWidget {
   }
 
   Widget _triviaTitle(BuildContext context) {
-    return Text(mTitle, style: Theme.of(context).textTheme.headline6);
+    return Text(
+      mTitle, 
+      textAlign: TextAlign.center,
+      style: Theme.of(context).textTheme.headline6)
+    ;
   }
 
   Widget _triviaDescription() {
